@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<config>
+  <PLC ip="192.168.1.1" port="2000" />
+  <NextCar type="AUDI" vin="LSV1D5G43R2012026" />
+  <NeedTest ID3="True" ID4X="True" ID6X="True" AUDI="True" />
+  <Rotation ID3="2.000" ID4X="2.000" ID6X="2.000" AUDI="2.000" />
+  <MaxMoveAngle value="3000" />
+  <CameraPixels value="9" />
+</config>

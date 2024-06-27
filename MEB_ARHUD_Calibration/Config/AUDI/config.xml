@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<config>
+  <Directory path="D:\Log_ID3" />
+  <PixelToMM ratio="0.92" />
+  <Distance length="13000" />
+  <Camera serial="24124037" />
+  <Threshold value="150" />
+  <Center CC_X="65" CC_Y="2" />
+  <Offset X="-45" Y="-90" />
+</config>
