@@ -1,24 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Net.Sockets;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 
-namespace MEB_ARHUD_Calibration.Logic
-{
-    class EquipmentOnePosLogic
-    {
+namespace MEB_ARHUD_Calibration.Logic {
+    class EquipmentOnePosLogic {
 
-        public EquipmentOnePosLogic()
-        {
+        public EquipmentOnePosLogic() {
 
         }
 
-        public EquipmentOnePosLogic(string name, string ip)
-        {
+        public EquipmentOnePosLogic(string name, string ip) {
             this.Name = name;
             this.IP = ip;
         }
@@ -38,8 +30,7 @@ namespace MEB_ARHUD_Calibration.Logic
 
         MessageLogic mL = MessageLogic.GetInstance();
 
-        public bool Connect()
-        {
+        public bool Connect() {
             CheckConnectState = 5;
 
             if (socketClient != null && socketClient.Connected)
@@ -49,15 +40,13 @@ namespace MEB_ARHUD_Calibration.Logic
             IPAddress address = IPAddress.Parse(IP);
             IPEndPoint point = new IPEndPoint(address, Port);
 
-            try
-            {
+            try {
                 socketClient.Connect(point);
                 connected = true;
                 StartReceiveThread();
                 mL.ShowLog(Name + " Connect Success", LogType.Equipment);
             }
-            catch (Exception)
-            {
+            catch (Exception) {
                 mL.ShowLog(Name + " Connect False", LogType.Equipment);
                 return false;
             }
@@ -65,38 +54,30 @@ namespace MEB_ARHUD_Calibration.Logic
             return true;
         }
 
-        public void Close()
-        {
-            try
-            {
+        public void Close() {
+            try {
                 socketClient.Close();
             }
-            catch (Exception)
-            {
+            catch (Exception) {
                 mL.ShowLog(Name + " Close Error", LogType.Equipment);
             }
         }
 
-        private void StartReceiveThread()
-        {
+        private void StartReceiveThread() {
             Thread t = new Thread(ReceiveThread);
             t.IsBackground = true;
             t.Start();
         }
 
-        private void ReceiveThread()
-        {
-            while (connected && socketClient.Connected)
-            {
+        private void ReceiveThread() {
+            while (connected && socketClient.Connected) {
                 byte[] receive = ReceiveDatas();
                 AnalyseReceiveInfo(receive);
             }
         }
 
-        private byte[] ReceiveDatas()
-        {
-            try
-            {
+        private byte[] ReceiveDatas() {
+            try {
                 CheckConnectState = 5;
                 byte[] arrRecvmsg = new byte[1024 * 1024];
                 int length = socketClient.Receive(arrRecvmsg);
@@ -108,8 +89,7 @@ namespace MEB_ARHUD_Calibration.Logic
 
                 return recDatas;
             }
-            catch (Exception)
-            {
+            catch (Exception) {
                 connected = false;
                 if (socketClient != null)
                     socketClient.Dispose();
@@ -119,31 +99,25 @@ namespace MEB_ARHUD_Calibration.Logic
             return new byte[0];
         }
 
-        private void AnalyseReceiveInfo(byte[] datas)
-        {
+        private void AnalyseReceiveInfo(byte[] datas) {
 
         }
 
         object sendMessageState = new object();
 
-        public void ClientSendDatas(byte[] datas)
-        {
-            try
-            {
-                if (!connected)
-                {
+        public void ClientSendDatas(byte[] datas) {
+            try {
+                if (!connected) {
                     return;
                 }
 
-                lock (sendMessageState)
-                {
+                lock (sendMessageState) {
                     socketClient?.Send(datas);
                     mL.ShowLog("Tx " + ByteArrToHexString(datas), LogType.Equipment);
                     Thread.Sleep(50);
                 }
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Console.WriteLine(e.Message);
             }
         }
@@ -152,11 +126,9 @@ namespace MEB_ARHUD_Calibration.Logic
 
         byte[] Data_CommuncationStart = { 0x30, 0x30, 0x32, 0x30, 0x30, 0x30, 0x30, 0x31, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00 };
 
-        public void SendCommuncationStart()
-        {
+        public void SendCommuncationStart() {
             ClientSendDatas(Data_CommuncationStart);
-            if (!isKeepingAlive)
-            {
+            if (!isKeepingAlive) {
                 isKeepingAlive = true;
                 Thread t_KeepAlive = new Thread(SendKeepAliveThread);
                 t_KeepAlive.IsBackground = true;
@@ -164,10 +136,8 @@ namespace MEB_ARHUD_Calibration.Logic
             }
         }
 
-        private void SendKeepAliveThread()
-        {
-            while (isKeepingAlive)
-            {
+        private void SendKeepAliveThread() {
+            while (isKeepingAlive) {
                 SendKeepAlive();
                 Thread.Sleep(4000);
             }
@@ -175,15 +145,13 @@ namespace MEB_ARHUD_Calibration.Logic
 
         byte[] Data_KeepAlive = { 0x30, 0x30, 0x32, 0x30, 0x39, 0x39, 0x39, 0x39, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00 };
 
-        public void SendKeepAlive()
-        {
+        public void SendKeepAlive() {
             ClientSendDatas(Data_KeepAlive);
         }
 
         byte[] Data_SelectPset = { 0x30, 0x30, 0x32, 0x33, 0x30, 0x30, 0x31, 0x38, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x30, 0x30, 0x31, 0x00 };
 
-        public void SendSelectPset(int index)
-        {
+        public void SendSelectPset(int index) {
             Pset = index;
             byte selected = (byte)(0x30 + index);
             Data_SelectPset[22] = selected;
@@ -192,8 +160,7 @@ namespace MEB_ARHUD_Calibration.Logic
 
         byte[] Data_CommuncationStop = { 0x30, 0x30, 0x32, 0x30, 0x30, 0x30, 0x30, 0x33, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00 };
 
-        public void SendCommuncationStop()
-        {
+        public void SendCommuncationStop() {
             ClientSendDatas(Data_CommuncationStop);
             isKeepingAlive = false;
         }
@@ -229,21 +196,17 @@ namespace MEB_ARHUD_Calibration.Logic
         int Pset = 1;
 
 
-        public void SendSetAngleSpeed(int angle, int speed)
-        {
-            if (angle >= 0)
-            {
+        public void SendSetAngleSpeed(int angle, int speed) {
+            if (angle >= 0) {
                 Data_SetAngle[243] = 0x43;
                 Data_SetAngle[244] = 0x57;
             }
-            else
-            {
+            else {
                 Data_SetAngle[243] = 0x43;
                 Data_SetAngle[244] = 0x43;
 
             }
-            if (angle == 0)
-            {
+            if (angle == 0) {
                 if (LastAngle < 0)
                     angle = -6;
                 else
@@ -254,168 +217,141 @@ namespace MEB_ARHUD_Calibration.Logic
             SetAngle(angle);
             SetSafeAngle(angle);
             SetMaxAngle(angle);
-            
-            for (int i = 0; i < 5; i++)
-            {
+
+            for (int i = 0; i < 5; i++) {
                 Data_SetAngle[168 - i] = 0x30;
             }
 
             byte[] speedData = ChangeSpeedToData(speed);
-            for (int i = 0; i < speedData.Length; i++)
-            {
+            for (int i = 0; i < speedData.Length; i++) {
                 byte data = speedData[speedData.Length - 1 - i];
                 Data_SetAngle[168 - i] = data;
             }
-            
+
             LastAngle = angle;
             mL.ShowLog(Name + ": " + angle, LogType.Equipment);
             ClientSendDatas(Data_SetAngle);
         }
 
-        public void SendSetAngle(int angle)
-        {
+        public void SendSetAngle(int angle) {
             int speed = 10;
             int angleValue = Math.Abs(angle);
-            if(angleValue >=200)
-            {
+            if (angleValue >= 200) {
                 speed = 20;
             }
             SendSetAngleSpeed(angle, speed);
         }
 
-        public void SendBackAngle()
-        {
-            if (LastAngle == 0)
-            {
+        public void SendBackAngle() {
+            if (LastAngle == 0) {
                 SendSetAngle(0);
             }
-            
-            else if (LastAngle > 0)
-            {
+
+            else if (LastAngle > 0) {
                 //SendSetAngle(-5);
                 SendSetAngle(-7);
             }
-            else if (LastAngle < 0)
-            {
+            else if (LastAngle < 0) {
                 //SendSetAngle(5);
                 SendSetAngle(7);
             }
         }
 
 
-        private void SetMinAngle(int angle)
-        {
+        private void SetMinAngle(int angle) {
             angle = Math.Abs(angle);
             if (angle < 100)
                 angle = 0;
             else
                 angle -= 100;
 
-            for (int i = 0; i < 5; i++)
-            {
+            for (int i = 0; i < 5; i++) {
                 Data_SetAngle[95 - i] = 0x30;
             }
 
             byte[] angleData = ChangeAngleToData(angle);
-            for (int i = 0; i < angleData.Length; i++)
-            {
+            for (int i = 0; i < angleData.Length; i++) {
                 byte data = angleData[angleData.Length - 1 - i];
                 Data_SetAngle[95 - i] = data;
             }
 
         }
 
-        private void SetAngle(int angle)
-        {
-            for (int i = 0; i < 5; i++)
-            {
+        private void SetAngle(int angle) {
+            for (int i = 0; i < 5; i++) {
                 Data_SetAngle[119 - i] = 0x30;
             }
 
             byte[] angleData = ChangeAngleToData(angle);
-            for (int i = 0; i < angleData.Length; i++)
-            {
+            for (int i = 0; i < angleData.Length; i++) {
                 byte data = angleData[angleData.Length - 1 - i];
                 Data_SetAngle[119 - i] = data;
             }
         }
 
-        private void SetSafeAngle(int angle)
-        {
+        private void SetSafeAngle(int angle) {
             angle = Math.Abs(angle);
             angle += 100;
 
-            for (int i = 0; i < 5; i++)
-            {
+            for (int i = 0; i < 5; i++) {
                 Data_SetAngle[111 - i] = 0x30;
             }
 
             byte[] angleData = ChangeAngleToData(angle);
-            for (int i = 0; i < angleData.Length; i++)
-            {
+            for (int i = 0; i < angleData.Length; i++) {
                 byte data = angleData[angleData.Length - 1 - i];
                 Data_SetAngle[111 - i] = data;
             }
 
         }
 
-        private void SetMaxAngle(int angle)
-        {
+        private void SetMaxAngle(int angle) {
             angle = Math.Abs(angle);
             angle += 100;
 
-            for (int i = 0; i < 5; i++)
-            {
+            for (int i = 0; i < 5; i++) {
                 Data_SetAngle[111 - i] = 0x30;
             }
 
             byte[] angleData = ChangeAngleToData(angle);
-            for (int i = 0; i < angleData.Length; i++)
-            {
+            for (int i = 0; i < angleData.Length; i++) {
                 byte data = angleData[angleData.Length - 1 - i];
                 Data_SetAngle[103 - i] = data;
             }
 
         }
 
-        private byte[] ChangeAngleToData(int angle)
-        {
+        private byte[] ChangeAngleToData(int angle) {
             string angleStr = Math.Abs(angle) + "";
             byte[] datas = StringToByteArray(angleStr);
             return datas;
         }
 
-        private byte[] ChangeSpeedToData(int speed)
-        {
+        private byte[] ChangeSpeedToData(int speed) {
             string angleStr = Math.Abs(speed) + "";
             byte[] datas = StringToByteArray(angleStr);
             return datas;
         }
 
-        public byte[] StringToByteArray(string str)
-        {
+        public byte[] StringToByteArray(string str) {
             char[] charArr = str.ToCharArray(0, str.Length);
             byte[] rlt = new byte[charArr.Length];
-            for (int i = 0; i < charArr.Length; i++)
-            {
+            for (int i = 0; i < charArr.Length; i++) {
                 char one = charArr[i];
                 rlt[i] = (byte)one;
             }
             return rlt;
         }
 
-        public static string ByteArrToHexString(byte[] values)
-        {
+        public static string ByteArrToHexString(byte[] values) {
             string rlt = "";
-            for (int i = 0; i < values.Length; i++)
-            {
+            for (int i = 0; i < values.Length; i++) {
                 rlt += ByteToHexString(values[i]) + " ";
             }
             return rlt;
         }
 
-        public static string ByteToHexString(byte value)
-        {
+        public static string ByteToHexString(byte value) {
             string valueStr = value.ToString("x8");
             return valueStr.Substring(valueStr.Length - 2, 2);
         }

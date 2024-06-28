@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
-namespace MEB_ARHUD_Calibration.Common
-{
-    enum ProjectType
-    {
+namespace MEB_ARHUD_Calibration.Common {
+    enum ProjectType {
         Unknown,
         ID3,
         ID4X,
@@ -18,8 +13,7 @@ namespace MEB_ARHUD_Calibration.Common
         AUDIN
     }
 
-    enum TestResultType
-    {
+    enum TestResultType {
         Success = 1,
         Fail = 0,
         AnalyseError = -10,
@@ -28,19 +22,8 @@ namespace MEB_ARHUD_Calibration.Common
         RotationError = -2,
     }
 
-    class Config
-    {
-        public static bool IsDevelopmentEnvironment = false;
-
-        public static bool AutoLoginBySuperAdmin = false;
-
-        public static ProjectType ProjectType = ProjectType.ID3;
-        public static string ProjectName = "Name";
-        public static string ProjectConfigDirectory = "ID3";
-
-        public static string ExportDirectory = "";
-        public static string LogExportDirectory { get { return ExportDirectory + "\\log"; } }
-        public static string ImageLogExportDirectory { get { return ExportDirectory + "\\imageLog"; } }
+    class Config {
+        public static ProjectType CurrentProject = ProjectType.ID3;
 
         public static double PixelToMMRatio = 0.52;
         public static double DefaultDistance = 10000;
@@ -75,6 +58,6 @@ namespace MEB_ARHUD_Calibration.Common
 
         public static int CenterMovedLimit = 9;
 
-
+        public static string OutDirectory = @"E:\ARHUD_LOGS";
     }
 }

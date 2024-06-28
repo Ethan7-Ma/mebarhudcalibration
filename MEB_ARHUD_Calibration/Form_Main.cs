@@ -10,7 +10,7 @@ using System.Windows.Forms;
 namespace MEB_ARHUD_Calibration {
     public partial class Form_Main : Form {
 
-        private bool ShowCameraOffset = true;
+        private bool IsOffset = true;
 
         CameraLogic camL = CameraLogic.GetInstance();
         ConfigLogic cfgL = ConfigLogic.GetInstance();
@@ -20,6 +20,7 @@ namespace MEB_ARHUD_Calibration {
         PLCLogic plcL = PLCLogic.GetInstance();
         EquipmentLogic eL = EquipmentLogic.GetInstance();
         ImageAnalyseLogic iaL = ImageAnalyseLogic.GetInstance();
+        ExportLogic expL = ExportLogic.GetInstance();
 
         int heart = 0;
         int lastHeart = -1;
@@ -40,7 +41,6 @@ namespace MEB_ARHUD_Calibration {
 
             //startCamera
             camL.InitCamera();
-            camL.SwitchCameraWithCurrentProject();
 
             //registerEvent
             RegisterEvent();
@@ -68,9 +68,11 @@ namespace MEB_ARHUD_Calibration {
             iD6XNToolStripMenuItem_NeedTest.Checked = Config.NeedTest_ID6XN;
             aUDINToolStripMenuItem_NeedTest.Checked = Config.NeedTest_AUDIN;
 
-            Text = $"ARHUD{Config.ProjectType}";
-            Label_ProjectType.Text = $"{Config.ProjectType}";
+            Text = $"ARHUD{Config.CurrentProject}";
+            Label_ProjectType.Text = $"{Config.CurrentProject}";
         }
+
+        #region RegisterEvent
 
         private void RegisterEvent() {
             camL.CameraNewFrameEvent += CameraNewFrame;
@@ -88,190 +90,66 @@ namespace MEB_ARHUD_Calibration {
             mL.ShowStateMessageEvent += ShowStateMessageEvent;
         }
 
-        private void ShowStateMessageEvent(string msg) {
+        private void CameraNewFrame(Bitmap bitmap) {
             Invoke(() => {
-                ToolStripStatusLabel_TestState.Text = msg;
-            });
-        }
-
-
-        private void ChangeID3() {
-            Config.ProjectType = ProjectType.ID3;
-        }
-        private void ChangeID4X() {
-            Config.ProjectType = ProjectType.ID4X;
-        }
-        private void ChangeID6X() {
-            Config.ProjectType = ProjectType.ID6X;
-        }
-        private void ChangeAUDI() {
-            Config.ProjectType = ProjectType.AUDI;
-        }
-
-        private void ChangeID3N() {
-            Config.ProjectType = ProjectType.ID3N;
-        }
-        private void ChangeID4N() {
-            Config.ProjectType = ProjectType.ID4XN;
-        }
-        private void ChangeID6XN() {
-            Config.ProjectType = ProjectType.ID6XN;
-        }
-        private void ChangeAUDIN() {
-            Config.ProjectType = ProjectType.AUDIN;
-        }
-
-
-        private void iD3ToolStripMenuItem_Click(object sender, EventArgs e) {
-            ChangeID3();
-        }
-        private void iD4XToolStripMenuItem_Click(object sender, EventArgs e) {
-            ChangeID4X();
-        }
-        private void iD6XToolStripMenuItem_Click(object sender, EventArgs e) {
-            ChangeID6X();
-        }
-        private void aUDIToolStripMenuItem_Click(object sender, EventArgs e) {
-            ChangeAUDI();
-        }
-
-        private void iD3NToolStripMenuItem_Click(object sender, EventArgs e) {
-            ChangeID3N();
-        }
-        private void iD4XNToolStripMenuItem_Click(object sender, EventArgs e) {
-            ChangeID4N();
-        }
-        private void iD6XNToolStripMenuItem_Click(object sender, EventArgs e) {
-            ChangeID6XN();
-        }
-        private void aUDINToolStripMenuItem_Click(object sender, EventArgs e) {
-            ChangeAUDIN();
-        }
-
-
-        private void CarTestFinish() {
-            Invoke((EventHandler)delegate {
-                try {
-                    int carType = fL.GetCarType(fL.NextNeedTestCar);
-
-                    ProjectType nextCarType = (ProjectType)carType;
-
-                    mL.ShowLog("测试完成，切换 " + carType, LogType.FIS);
-                    Label_NextCar.Text = "Next Car : " + nextCarType + " " + fL.NextNeedTestCar.VIN + " " + fL.NextNeedTestCar.SequenceNumber;
-
-                    cfgL.SaveNextCarInfo(nextCarType, fL.NextNeedTestCar.VIN);
-                    plcL.CanChangeCar = true;
-
-                    Config.ProjectType = nextCarType;
-
-                }
-                catch (Exception e) {
-                    ExceptionUtil.SaveException(e);
-                }
+                DrawLinesForShowInfo(bitmap, IsOffset);
+                PictureBox_Main.Image = bitmap;
             });
         }
 
         private void AnalyseImageCenterTestFinished() {
-            Invoke((EventHandler)delegate {
-                try {
-                    Label_EquipmentA.Text = tL.TestResult.Angle_L + "";
-                    Label_EquipmentB.Text = tL.TestResult.Angle_R + "";
-                    Label_Rotation.Text = $"{iaL.RotationResult:0.00}";
-                }
-                catch (Exception e) {
-                    ExceptionUtil.SaveException(e);
-                }
-            });
-        }
-
-        private void AnalyseImageCenterTestResult(bool rlt) {
-            Invoke((EventHandler)delegate {
-                try {
-                    if (rlt) {
-                        Label_Result.Text = "OK";
-                        Label_Result.ForeColor = Color.Green;
-                    }
-                    else {
-                        Label_Result.Text = "NG";
-                        Label_Result.ForeColor = Color.Red;
-                    }
-                }
-                catch (Exception e) {
-                    ExceptionUtil.SaveException(e);
-                }
+            Invoke(() => {
+                Label_EquipmentA.Text = $"{tL.TestResult.Angle_L}";
+                Label_EquipmentB.Text = $"{tL.TestResult.Angle_R}";
+                Label_Rotation.Text = $"{iaL.RotationResult:0.00}";
             });
         }
 
         private void AnalyseImageCenterTestStart() {
-            Invoke((EventHandler)delegate {
-                try {
-                    Label_Result.Text = "--";
-                    Label_Result.ForeColor = Color.Gray;
-                    Label_CarType.Text = Config.ProjectType + "";
-                    Label_EquipmentA.Text = "";
-                    Label_EquipmentB.Text = "";
-                    Label_Rotation.Text = "0";
+            Invoke(() => {
+                Label_Result.Text = "--";
+                Label_Result.ForeColor = Color.Gray;
+                Label_CarType.Text = Config.CurrentProject + "";
+                Label_EquipmentA.Text = "";
+                Label_EquipmentB.Text = "";
+                Label_Rotation.Text = "0";
+            });
+        }
+
+        private void AnalyseImageCenterTestResult(bool rlt) {
+            Invoke(() => {
+                if (rlt) {
+                    Label_Result.Text = "OK";
+                    Label_Result.ForeColor = Color.Green;
                 }
-                catch (Exception e) {
-                    ExceptionUtil.SaveException(e);
+                else {
+                    Label_Result.Text = "NG";
+                    Label_Result.ForeColor = Color.Red;
                 }
             });
         }
 
-        private void CameraNewFrame(Bitmap bitmap) {
-            Invoke((EventHandler)delegate {
-                try {
-                    DrawLinesForShowInfo(bitmap);
-                    PictureBox_Main.Image = bitmap;
-                }
-                catch (Exception e) {
-                    Console.WriteLine(e.Message);
-                }
-                GC.Collect();
+        private void CarTestFinish() {
+            Invoke(() => {
+                int carType = fL.GetCarType(fL.NextNeedTestCar);
+                ProjectType nextCarType = (ProjectType)carType;
+
+                Console.WriteLine($"测试完成，切换 {carType}");
+
+                Label_NextCar.Text = $"Next Car : {nextCarType} {fL.NextNeedTestCar.VIN} {fL.NextNeedTestCar.SequenceNumber}";
+
+                cfgL.SaveNextCarInfo(nextCarType, fL.NextNeedTestCar.VIN);
+                plcL.CanChangeCar = true;
+
+                Config.CurrentProject = nextCarType;
             });
         }
 
         private void RobotInCarEvent() {
-            try {
-                int type_i = fL.CheckCurrentCarType();
-                ProjectType type = (ProjectType)type_i;
-                if (type != Config.ProjectType) {
-                    Invoke((EventHandler)delegate {
-                        try {
-                            switch (type) {
-                                case ProjectType.ID3:
-                                    ChangeID3();
-                                    break;
-                                case ProjectType.ID4X:
-                                    ChangeID4X();
-                                    break;
-                                case ProjectType.ID6X:
-                                    ChangeID6X();
-                                    break;
-                                case ProjectType.AUDI:
-                                    ChangeAUDI();
-                                    break;
-                                case ProjectType.ID3N:
-                                    ChangeID3N();
-                                    break;
-                                case ProjectType.ID4XN:
-                                    ChangeID4N();
-                                    break;
-                                case ProjectType.ID6XN:
-                                    ChangeID6XN();
-                                    break;
-                                case ProjectType.AUDIN:
-                                    ChangeAUDIN();
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        catch { }
-                    });
-                }
+            ProjectType type = (ProjectType)fL.CheckCurrentCarType();
+            if (type != Config.CurrentProject) {
+                Config.CurrentProject = type;
             }
-            catch { }
         }
 
         private void ImageTestEvent(int index) {
@@ -283,54 +161,27 @@ namespace MEB_ARHUD_Calibration {
             heart++;
         }
 
-        private void DrawLinesForShowInfo(Bitmap bitmap) {
-            Graphics g = Graphics.FromImage(bitmap);
-
-            int L = 100;
-            int X = bitmap.Width / 2;
-            int Y = bitmap.Height / 2;
-
-            X = X + Config.Camera_MoveX[Config.ProjectType];
-            Y = Y + Config.Camera_MoveY[Config.ProjectType];
-
-            if (ShowCameraOffset) {
-                X += Config.Camera_OffsetX[Config.ProjectType];
-                Y += Config.Camera_OffsetY[Config.ProjectType];
-            }
-
-            Pen linePen = new Pen(Color.FromArgb(0, 255, 0), 3);
-
-            g.DrawLine(linePen, new Point(X, Y - L), new Point(X, Y + L));
-            g.DrawLine(linePen, new Point(X - L, Y), new Point(X + L, Y));
-
-            int W = 20;
-
-            g.DrawLine(linePen, new Point(X - W / 2, Y - W / 2), new Point(X + W / 2, Y - W / 2));
-            g.DrawLine(linePen, new Point(X - W / 2, Y + W / 2), new Point(X + W / 2, Y + W / 2));
-            g.DrawLine(linePen, new Point(X - W / 2, Y - W / 2), new Point(X - W / 2, Y + W / 2));
-            g.DrawLine(linePen, new Point(X + W / 2, Y - W / 2), new Point(X + W / 2, Y + W / 2));
+        private void ShowStateMessageEvent(string msg) {
+            Invoke(() => {
+                ToolStripStatusLabel_TestState.Text = msg;
+            });
         }
 
-        private void Form_Main_FormClosed(object sender, FormClosedEventArgs e) {
-            try {
-                //camL.LiveStop();
-                ExceptionUtil.SaveExceptions();
-            }
-            catch (Exception ex) {
-                Console.WriteLine(ex.Message);
-            }
-        }
+        #endregion
+
+        #region Timer
 
         private void Timer_CheckState_Tick(object sender, EventArgs e) {
             Label_VIN.Text = plcL.CurrentRFID;
+            SetStateLabelColor(Label_Equipment_State, eL.Connected);
+            SetStateLabelColor(Label_FIS_State, fL.Connected);
             SetStateLabelColor(Label_Camera_State1, camL.CameraConnectState(0));
             SetStateLabelColor(Label_Camera_State2, camL.CameraConnectState(1));
             SetStateLabelColor(Label_Camera_State3, camL.CameraConnectState(2));
             SetStateLabelColor(Label_Camera_State4, camL.CameraConnectState(3));
             SetStateLabelColor(Label_Camera_State5, camL.CameraConnectState(4));
             SetStateLabelColor(Label_Camera_State6, camL.CameraConnectState(5));
-            SetStateLabelColor(Label_Equipment_State, eL.Connected);
-            SetStateLabelColor(Label_FIS_State, fL.Connected);
+
         }
 
         private void Timer_CheckPLC_Tick(object sender, EventArgs e) {
@@ -341,18 +192,33 @@ namespace MEB_ARHUD_Calibration {
             lastHeart = heart;
         }
 
-        private void SetStateLabelColor(Label label, bool state) {
-            label.ForeColor = state ? Color.Green : Color.Red;
+        #endregion
+
+        private void SwitchProject(ProjectType targetProjectType) {
+            Config.CurrentProject = targetProjectType;
+            camL.SwitchCameraWithCurrentProject();
         }
 
-        ExportLogic expL = ExportLogic.GetInstance();
+        #region MenuItem_SwitchProject
+        private void iD3ToolStripMenuItem_Click(object sender, EventArgs e) => SwitchProject(ProjectType.ID3);
+        private void iD4XToolStripMenuItem_Click(object sender, EventArgs e) => SwitchProject(ProjectType.ID4X);
+        private void iD6XToolStripMenuItem_Click(object sender, EventArgs e) => SwitchProject(ProjectType.ID6X);
+        private void aUDIToolStripMenuItem_Click(object sender, EventArgs e) => SwitchProject(ProjectType.AUDI);
+        private void iD3NToolStripMenuItem_Click(object sender, EventArgs e) => SwitchProject(ProjectType.ID3N);
+        private void iD4XNToolStripMenuItem_Click(object sender, EventArgs e) => SwitchProject(ProjectType.ID4XN);
+        private void iD6XNToolStripMenuItem_Click(object sender, EventArgs e) => SwitchProject(ProjectType.ID6XN);
+        private void aUDINToolStripMenuItem_Click(object sender, EventArgs e) => SwitchProject(ProjectType.AUDIN);
+        #endregion
+
+        #region MenuItem_Calibration
 
         private void 标定ID3相机ToolStripMenuItem_Click(object sender, EventArgs e) {
-            ChangeID3();
+            SwitchProject(ProjectType.ID3);
             Task.Factory.StartNew(() => {
                 try {
                     string fileName = string.Empty;
-                    List<PointF> points = GetCalibrationPointsInThread(out fileName);
+                    Bitmap bitmap = camL.GetCurrentBitmap();
+                    List<PointF> points = GetCalibrationPointsInThread(bitmap, out fileName);
                     if (points.Count == 3) {
                         Point centerMove = GetCenterPointMovedForCalibration(points[1]);
                         cfgL.SaveID3CameraCalibration(centerMove.X, centerMove.Y);
@@ -378,11 +244,12 @@ namespace MEB_ARHUD_Calibration {
         }
 
         private void 标定ID4X相机ToolStripMenuItem_Click(object sender, EventArgs e) {
-            ChangeID4X();
+            SwitchProject(ProjectType.ID4X);
             Task.Factory.StartNew(() => {
                 try {
                     string fileName = string.Empty;
-                    List<PointF> points = GetCalibrationPointsInThread(out fileName);
+                    Bitmap bitmap = camL.GetCurrentBitmap();
+                    List<PointF> points = GetCalibrationPointsInThread(bitmap, out fileName);
                     if (points.Count == 3) {
                         Point centerMove = GetCenterPointMovedForCalibration(points[2]);
                         cfgL.SaveID4XCameraCalibration(centerMove.X, centerMove.Y);
@@ -408,11 +275,12 @@ namespace MEB_ARHUD_Calibration {
         }
 
         private void 标定ID6X相机ToolStripMenuItem_Click(object sender, EventArgs e) {
-            ChangeID6X();
+            SwitchProject(ProjectType.ID6X);
             Task.Factory.StartNew(() => {
                 try {
                     string fileName = string.Empty;
-                    List<PointF> points = GetCalibrationPointsInThread(out fileName);
+                    Bitmap bitmap = camL.GetCurrentBitmap();
+                    List<PointF> points = GetCalibrationPointsInThread(bitmap, out fileName);
                     if (points.Count == 3) {
                         Point centerMove = GetCenterPointMovedForCalibration(points[0]);
                         cfgL.SaveID6XCameraCalibration(centerMove.X, centerMove.Y);
@@ -438,11 +306,12 @@ namespace MEB_ARHUD_Calibration {
         }
 
         private void 标定AUDI相机ToolStripMenuItem_Click(object sender, EventArgs e) {
-            ChangeAUDI();
+            SwitchProject(ProjectType.AUDI);
             Task.Factory.StartNew(() => {
                 try {
                     string fileName = string.Empty;
-                    List<PointF> points = GetCalibrationPointsInThread(out fileName);
+                    Bitmap bitmap = camL.GetCurrentBitmap();
+                    List<PointF> points = GetCalibrationPointsInThread(bitmap, out fileName);
                     if (points.Count == 3) {
                         Point centerMove = GetCenterPointMovedForCalibration(points[0]);
                         cfgL.SaveAUDICameraCalibration(centerMove.X, centerMove.Y);
@@ -468,11 +337,12 @@ namespace MEB_ARHUD_Calibration {
         }
 
         private void 标定ID3N相机ToolStripMenuItem_Click(object sender, EventArgs e) {
-            ChangeID3N();
+            SwitchProject(ProjectType.ID3N);
             Task.Factory.StartNew(() => {
                 try {
                     string fileName = string.Empty;
-                    List<PointF> points = GetCalibrationPointsInThread(out fileName);
+                    Bitmap bitmap = camL.GetCurrentBitmap();
+                    List<PointF> points = GetCalibrationPointsInThread(bitmap, out fileName);
                     if (points.Count == 3) {
                         Point centerMove = GetCenterPointMovedForCalibration(points[1]);
                         cfgL.SaveID3NCameraCalibration(centerMove.X, centerMove.Y);
@@ -498,11 +368,12 @@ namespace MEB_ARHUD_Calibration {
         }
 
         private void 标定ID4XN相机ToolStripMenuItem_Click(object sender, EventArgs e) {
-            ChangeID4N();
+            SwitchProject(ProjectType.ID4XN);
             Task.Factory.StartNew(() => {
                 try {
                     string fileName = string.Empty;
-                    List<PointF> points = GetCalibrationPointsInThread(out fileName);
+                    Bitmap bitmap = camL.GetCurrentBitmap();
+                    List<PointF> points = GetCalibrationPointsInThread(bitmap, out fileName);
                     if (points.Count == 3) {
                         Point centerMove = GetCenterPointMovedForCalibration(points[2]);
                         cfgL.SaveID4XNCameraCalibration(centerMove.X, centerMove.Y);
@@ -528,11 +399,12 @@ namespace MEB_ARHUD_Calibration {
         }
 
         private void 标定ID6XN相机ToolStripMenuItem_Click(object sender, EventArgs e) {
-            ChangeID6XN();
+            SwitchProject(ProjectType.ID6XN);
             Task.Factory.StartNew(() => {
                 try {
                     string fileName = string.Empty;
-                    List<PointF> points = GetCalibrationPointsInThread(out fileName);
+                    Bitmap bitmap = camL.GetCurrentBitmap();
+                    List<PointF> points = GetCalibrationPointsInThread(bitmap, out fileName);
                     if (points.Count == 3) {
                         Point centerMove = GetCenterPointMovedForCalibration(points[0]);
                         cfgL.SaveID6XNCameraCalibration(centerMove.X, centerMove.Y);
@@ -558,11 +430,12 @@ namespace MEB_ARHUD_Calibration {
         }
 
         private void 标定AUDIN相机ToolStripMenuItem_Click(object sender, EventArgs e) {
-            ChangeAUDIN();
+            SwitchProject(ProjectType.AUDIN);
             Task.Factory.StartNew(() => {
                 try {
                     string fileName = string.Empty;
-                    List<PointF> points = GetCalibrationPointsInThread(out fileName);
+                    Bitmap bitmap = camL.GetCurrentBitmap();
+                    List<PointF> points = GetCalibrationPointsInThread(bitmap, out fileName);
                     if (points.Count == 3) {
                         Point centerMove = GetCenterPointMovedForCalibration(points[0]);
                         cfgL.SaveAUDINCameraCalibration(centerMove.X, centerMove.Y);
@@ -587,42 +460,23 @@ namespace MEB_ARHUD_Calibration {
             });
         }
 
-        public Point GetCenterPointMovedForCalibration(PointF p) {
-            int moveX = (int)(p.X + 0.5) - (ImageAnalyseLogic.ImageWidth / 2);
-            int moveY = (int)(p.Y + 0.5) - (ImageAnalyseLogic.ImageHeight / 2);
+        #endregion
 
-            return new Point(moveX, moveY);
-        }
+        #region MenuItem_OtherWindow
 
-        private List<PointF> GetCalibrationPointsInThread(out string fileName) {
-            Thread.Sleep(1000);
-
-            Bitmap bitmap = camL.GetCurrentBitmap();
-            fileName = Environment.CurrentDirectory + @"\ImageLog\" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss") + ".jpg";
-            bitmap.Save(fileName, System.Drawing.Imaging.ImageFormat.Jpeg);
-            List<PointF> points = iaL.TestGetCircleForCalibration(fileName);
-
-            return points;
-        }
-
-        private void ToolStripMenuItem_ShowOffset_Click(object sender, EventArgs e) {
-            ShowCameraOffset = !ShowCameraOffset;
-            if (ShowCameraOffset) {
-                ToolStripMenuItem_ShowOffset.Text = "隐藏偏差";
-            }
-            else {
-                ToolStripMenuItem_ShowOffset.Text = "显示偏差";
-            }
-        }
-
-        private void 偏差设置ToolStripMenuItem_Click(object sender, EventArgs e) {
-
+        private void fIS窗口ToolStripMenuItem_Click(object sender, EventArgs e) {
+            Form_FIS_Info fis = new Form_FIS_Info();
+            fis.StartPosition = FormStartPosition.CenterParent;
+            fis.Show();
         }
 
         private void 测试窗口ToolStripMenuItem_Click(object sender, EventArgs e) {
 
         }
 
+        #endregion
+
+        #region MenuItem_NeedTest
         private void iD3ToolStripMenuItem_NeedTest_Click(object sender, EventArgs e) {
             Form_Login login = new Form_Login();
             login.StartPosition = FormStartPosition.CenterParent;
@@ -705,15 +559,53 @@ namespace MEB_ARHUD_Calibration {
             }
         }
 
-        private void fIS窗口ToolStripMenuItem_Click(object sender, EventArgs e) {
-            Form_FIS_Info fis = new Form_FIS_Info();
-            fis.StartPosition = FormStartPosition.CenterParent;
-            fis.Show();
+        #endregion
+
+        #region ImageProcess
+        private static void DrawLinesForShowInfo(Bitmap bitmap, bool isOffset) {
+            Graphics g = Graphics.FromImage(bitmap);
+
+            int L = 100;
+            int X = bitmap.Width / 2;
+            int Y = bitmap.Height / 2;
+
+            X += Config.Camera_MoveX[Config.CurrentProject];
+            Y += Config.Camera_MoveY[Config.CurrentProject];
+
+            if (isOffset) {
+                X += Config.Camera_OffsetX[Config.CurrentProject];
+                Y += Config.Camera_OffsetY[Config.CurrentProject];
+            }
+
+            Pen linePen = new(Color.FromArgb(0, 255, 0), 3);
+
+            g.DrawLine(linePen, new Point(X, Y - L), new Point(X, Y + L));
+            g.DrawLine(linePen, new Point(X - L, Y), new Point(X + L, Y));
+
+            int length = 20;
+
+            g.DrawLine(linePen, new Point(X - length / 2, Y - length / 2), new Point(X + length / 2, Y - length / 2));
+            g.DrawLine(linePen, new Point(X - length / 2, Y + length / 2), new Point(X + length / 2, Y + length / 2));
+            g.DrawLine(linePen, new Point(X - length / 2, Y - length / 2), new Point(X - length / 2, Y + length / 2));
+            g.DrawLine(linePen, new Point(X + length / 2, Y - length / 2), new Point(X + length / 2, Y + length / 2));
         }
 
-        private void button1_Click(object sender, EventArgs e) {
-            tL.AnalyseImageCenterWithCalcAngle(0);
+        private static void SetStateLabelColor(Label label, bool state) {
+            label.ForeColor = state ? Color.Green : Color.Red;
         }
 
+        private static Point GetCenterPointMovedForCalibration(PointF p) {
+            int moveX = (int)(p.X + 0.5) - (ImageAnalyseLogic.ImageWidth / 2);
+            int moveY = (int)(p.Y + 0.5) - (ImageAnalyseLogic.ImageHeight / 2);
+            return new Point(moveX, moveY);
+        }
+
+        private static List<PointF> GetCalibrationPointsInThread(Bitmap bitmap, out string fileName) {
+            fileName = @$"\ImageLog\{DateTime.Now:yyyy_MM_dd_HH_mm_ss}.jpg";
+            bitmap.Save(fileName, System.Drawing.Imaging.ImageFormat.Png);
+            List<PointF> points = ImageAnalyseLogic.TestGetCircleForCalibration(fileName);
+            return points;
+        }
+        #endregion
     }
 }

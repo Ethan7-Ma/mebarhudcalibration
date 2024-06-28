@@ -1,42 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
-namespace MEB_ARHUD_Calibration.Common
-{
-    class ExceptionLog 
-    {
+namespace MEB_ARHUD_Calibration.Common {
+    class ExceptionLog {
         public Exception e;
         public DateTime time;
 
-        public ExceptionLog(Exception ex, DateTime time)
-        {
+        public ExceptionLog(Exception ex, DateTime time) {
             this.e = ex;
             this.time = time;
         }
     }
 
-    class ExceptionUtil
-    {
+    class ExceptionUtil {
         private static List<ExceptionLog> Exceptions = new List<ExceptionLog>();
 
-        private static bool CheckExceptionExisted(Exception ex)
-        {
-            foreach(ExceptionLog e in Exceptions)
-            {
+        private static bool CheckExceptionExisted(Exception ex) {
+            foreach (ExceptionLog e in Exceptions) {
                 if (e.e.Message.Equals(ex.Message))
                     return true;
             }
             return false;
         }
 
-        public static void SaveException(Exception e)
-        {
-            if (Config.IsDevelopmentEnvironment)
-                return;
+        public static void SaveException(Exception e) {
             if (CheckExceptionExisted(e))
                 return;
 
@@ -56,10 +44,8 @@ namespace MEB_ARHUD_Calibration.Common
 
         static object SaveLogLocker = new object();
 
-        public static void SaveExceptions()
-        {
-            lock (SaveLogLocker)
-            {
+        public static void SaveExceptions() {
+            lock (SaveLogLocker) {
 
                 if (Exceptions.Count <= 0)
                     return;
@@ -71,46 +57,37 @@ namespace MEB_ARHUD_Calibration.Common
 
                 string fileName = "Exception_" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff") + ".txt";
                 fileName = currPathStr + "\\" + fileName;
-                if (File.Exists(fileName))
-                {
+                if (File.Exists(fileName)) {
                     fileName = "Exception_1_" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff") + ".txt";
                     fileName = currPathStr + "\\" + fileName;
                 }
                 if (File.Exists(fileName))
                     return;
 
-                try
-                {
+                try {
 
                     FileStream fs = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Write);
                     StreamWriter sw = new StreamWriter(fs);
 
-                    try
-                    {
-                        foreach (ExceptionLog ex in Exceptions)
-                        {
+                    try {
+                        foreach (ExceptionLog ex in Exceptions) {
                             sw.WriteLine(ex.time.ToString("yyyy-MM-dd:HH:mm:ss:fff"));
                             sw.WriteLine(ex.e.Message);
                             sw.WriteLine(ex.e.StackTrace);
                             sw.WriteLine("");
                         }
                     }
-                    finally
-                    {
+                    finally {
                         Exceptions = new List<ExceptionLog>();
-                        try
-                        {
+                        try {
                             sw.Close();
                         }
-                        catch (Exception)
-                        {
+                        catch (Exception) {
                         }
-                        try
-                        {
+                        try {
                             fs.Close();
                         }
-                        catch (Exception)
-                        {
+                        catch (Exception) {
                         }
                     }
                 }

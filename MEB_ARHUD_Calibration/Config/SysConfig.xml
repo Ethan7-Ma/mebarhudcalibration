@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <config>
   <!--<PLC ip="192.168.1.1" port="2000" />-->
-  <NextCar type="AU123123DI"/>
+  <NextCar type="AUDI"/>
   <!--<NeedTest ID3="True" ID4X="True" ID6X="True" AUDI="True" ID3N="True" ID4XN="True" ID6XN="True" AUDIN="True" />
   <Rotation ID3="2.000" ID4X="2.000" ID6X="2.000" AUDI="2.000" />
   <MaxMoveAngle value="3000" />

@@ -1,27 +1,21 @@
-﻿using System;
+﻿using MEB_ARHUD_Calibration.Common;
+using MEB_ARHUD_Calibration.Models;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using MEB_ARHUD_Calibration.Common;
-using MEB_ARHUD_Calibration.Data;
 
-namespace MEB_ARHUD_Calibration.Logic
-{
-    class FISLogic
-    {
+namespace MEB_ARHUD_Calibration.Logic {
+    class FISLogic {
         private static FISLogic instance = null;
-        
-        public static FISLogic GetInstance()
-        {
+
+        public static FISLogic GetInstance() {
             if (instance == null)
                 instance = new FISLogic();
             return instance;
         }
 
-        private FISLogic()
-        {
+        private FISLogic() {
             GetAllData();
 
             Thread t = new Thread(GetFISDataThread);
@@ -47,28 +41,23 @@ namespace MEB_ARHUD_Calibration.Logic
         private int ConnectFalg = 0;
         public bool Connected => ConnectFalg > 0;
 
-        private void GetAllData()
-        {
-            Task.Factory.StartNew(() =>
-            {
-                try
-                {
+        private void GetAllData() {
+            Task.Factory.StartNew(() => {
+                try {
                     List<CarInfo> cars_0 = GetCarsFromFIS(0);
 
                     List<List<CarInfo>> list_Get10 = new List<List<CarInfo>>();
 
                     List<CarInfo> currentCars = cars_0;
 
-                    for (int i = 0; i < 10; i++)
-                    {
+                    for (int i = 0; i < 10; i++) {
                         int before = GetBeforeGetIndex(currentCars);
                         currentCars = GetCarsFromFIS(before);
                         list_Get10.Add(currentCars);
                     }
 
                     List<CarInfo> allCars = new List<CarInfo>();
-                    for (int i = 0; i < 10; i++)
-                    {
+                    for (int i = 0; i < 10; i++) {
                         allCars.AddRange(list_Get10[9 - i]);
                     }
                     allCars.AddRange(cars_0);
@@ -76,23 +65,20 @@ namespace MEB_ARHUD_Calibration.Logic
 
                     List<CarInfo_OnLineState> cars_States = new List<CarInfo_OnLineState>();
 
-                    foreach (CarInfo info in allCars)
-                    {
+                    foreach (CarInfo info in allCars) {
                         CarInfo_OnLineState carState = new CarInfo_OnLineState(info);
                         cars_States.Add(carState);
                     }
 
                     Cars = cars_States;
                 }
-                catch (Exception ex)
-                {
+                catch (Exception ex) {
                     ExceptionUtil.SaveException(ex);
                 }
             });
         }
 
-        private int GetBeforeGetIndex(List<CarInfo> cars)
-        {
+        private int GetBeforeGetIndex(List<CarInfo> cars) {
             int index = cars[0].SequenceNumber;
             index = index - 101;
             if (index <= 0)
@@ -100,36 +86,29 @@ namespace MEB_ARHUD_Calibration.Logic
             return index;
         }
 
-        private void GetFISDataThread()
-        {
-            while (true)
-            {
-                for (int i = 0; i < 30; i++)
-                {
+        private void GetFISDataThread() {
+            while (true) {
+                for (int i = 0; i < 30; i++) {
                     Thread.Sleep(1000);
                 }
 
 
                 if (Cars.Count <= 0)
                     GetAllData();
-                else
-                {
+                else {
                     List<CarInfo> cars_0 = GetCarsFromFIS(0);
 
                     int currentMax = Cars[Cars.Count - 1].SequenceNumber;
 
                     int hasCount = 0;
 
-                    for (int i = 0; i < cars_0.Count; i++)
-                    {
-                        if (currentMax == cars_0[i].SequenceNumber)
-                        {
+                    for (int i = 0; i < cars_0.Count; i++) {
+                        if (currentMax == cars_0[i].SequenceNumber) {
                             hasCount = i + 1;
                         }
                     }
 
-                    for (int i = hasCount; i < cars_0.Count; i++)
-                    {
+                    for (int i = hasCount; i < cars_0.Count; i++) {
                         Cars.RemoveAt(0);
                         CarInfo_OnLineState carState = new CarInfo_OnLineState(cars_0[i]);
                         Cars.Add(carState);
@@ -140,24 +119,19 @@ namespace MEB_ARHUD_Calibration.Logic
             }
         }
 
-        private void CheckStateThread()
-        {
-            while (true)
-            {
+        private void CheckStateThread() {
+            while (true) {
                 Thread.Sleep(1000);
                 ConnectFalg--;
             }
         }
 
-        private List<CarInfo> GetCarsFromFIS(int number)
-        {
+        private List<CarInfo> GetCarsFromFIS(int number) {
             string url = "http://172.22.24.4:8090/api/GetCarInfo";
             string data = "{\"SequenceNumber\":" + number + "}";
-            try
-            {
+            try {
                 string rlt = HttpHelper.httpPostByJson(url, data);
-                if (rlt.Length <= 0)
-                {
+                if (rlt.Length <= 0) {
                     Console.WriteLine("响应超时");
                     return new List<CarInfo>();
                 }
@@ -166,8 +140,7 @@ namespace MEB_ARHUD_Calibration.Logic
                 ConnectFalg = 40;
                 return receive.Data;
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Console.WriteLine(e.Message);
                 Console.WriteLine(e.StackTrace);
             }
@@ -175,59 +148,49 @@ namespace MEB_ARHUD_Calibration.Logic
         }
 
 
-        public void UploadCurrentCarFISResult(double rotation, double loa, int result)
-        {
+        public void UploadCurrentCarFISResult(double rotation, double loa, int result) {
             Task.Factory.StartNew(() => {
-                try
-                {
+                try {
                     SendFISData_Thread(CurrentRFIDCar.SequenceNumber, CurrentRFIDCar.VIN, rotation, loa, result);
                 }
                 catch { }
             });
         }
 
-        private void SendFISData_Thread(int number, string VIN, double rotation, double loa, int result)
-        {
+        private void SendFISData_Thread(int number, string VIN, double rotation, double loa, int result) {
             string url = "http://172.22.24.4:8090/api/UploadResult";
 
             SendPostObj sendData = new SendPostObj(number, VIN, "HUD001", $"{rotation:0.0}", $"{loa:0.0}", result + "");
 
             string data = sendData.ToJson();
 
-            try
-            {
+            try {
                 eL.SaveFISTestResultToCSV(sendData);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
 
             }
 
-            try
-            {
+            try {
                 string rlt = HttpHelper.httpPostByJson(url, data);
-                if (rlt.Length <= 0)
-                {
+                if (rlt.Length <= 0) {
                     Console.WriteLine("响应超时");
                     return;
                 }
                 FISReceiveData receive = FISReceiveDataHelper.GetData(rlt);
                 ConnectFalg = 40;
                 Console.WriteLine(receive.ErrorCode);
-                
+
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 Console.WriteLine(ex.Message);
                 Console.WriteLine(ex.StackTrace);
             }
         }
 
-        public CarInfo_OnLineState SetCurrentCarByRFID(string rfid)
-        {
+        public CarInfo_OnLineState SetCurrentCarByRFID(string rfid) {
             CarInfo_OnLineState carInfo = GetCarInfoState(rfid);
-            if (carInfo != null)
-            {
+            if (carInfo != null) {
                 CurrentRFIDCar = carInfo;
             }
             else
@@ -235,74 +198,59 @@ namespace MEB_ARHUD_Calibration.Logic
             return carInfo;
         }
 
-        public int CheckCurrentCarType()
-        {
-            if(CurrentRFIDCar != null)
-            {
+        public int CheckCurrentCarType() {
+            if (CurrentRFIDCar != null) {
                 return GetCarType(CurrentRFIDCar);
             }
             return 0;
         }
 
-        public int CheckCurrentHUDType()
-        {
-            if (CurrentRFIDCar != null)
-            {
+        public int CheckCurrentHUDType() {
+            if (CurrentRFIDCar != null) {
                 return GetHUDType(CurrentRFIDCar);
             }
             return 0;
         }
 
-        public int CheckCarType(string rfid)
-        {
+        public int CheckCarType(string rfid) {
             mL.ShowLog("RFID : " + rfid, LogType.FIS);
             CarInfo_OnLineState carInfo = GetCarInfoState(rfid);
             return GetCarType(carInfo);
         }
 
-        public ProjectType GetCarType(int carType)
-        {
+        public ProjectType GetCarType(int carType) {
             return (ProjectType)carType;
         }
 
-        public int GetCarType(CarInfo_OnLineState carInfo)
-        {
-            if (carInfo != null)
-            {
+        public int GetCarType(CarInfo_OnLineState carInfo) {
+            if (carInfo != null) {
                 mL.ShowLog("CarInfo : " + carInfo.MODELL + " " + carInfo.HUD, LogType.FIS);
-                if (carInfo.MODELL.Equals("E912AF") || carInfo.MODELL.Equals("E913AF"))
-                {
+                if (carInfo.MODELL.Equals("E912AF") || carInfo.MODELL.Equals("E913AF")) {
                     return 1;
                 }
                 if (carInfo.MODELL.Equals("E412TF") || carInfo.MODELL.Equals("E412PN") || carInfo.MODELL.Equals("E413KN") || carInfo.MODELL.Equals("E419HN")
-                    || carInfo.MODELL.Equals("E412JN") || carInfo.MODELL.Equals("E413JN") || carInfo.MODELL.Equals("E413RN") || carInfo.MODELL.Equals("E419RN"))
-                {
+                    || carInfo.MODELL.Equals("E412JN") || carInfo.MODELL.Equals("E413JN") || carInfo.MODELL.Equals("E413RN") || carInfo.MODELL.Equals("E419RN")) {
                     return 2;
                 }
                 if (carInfo.MODELL.Equals("E512DJ") || carInfo.MODELL.Equals("E512HN") || carInfo.MODELL.Equals("E513HN") || carInfo.MODELL.Equals("E514MN")
-                    || carInfo.MODELL.Equals("E514NN"))
-                {
+                    || carInfo.MODELL.Equals("E514NN")) {
                     return 3;
                 }
                 if (carInfo.MODELL.Equals("G4IBB2") || carInfo.MODELL.Equals("G4ICB2") || carInfo.MODELL.Equals("G4IBC3") ||
-                    carInfo.MODELL.Equals("G4ICC3") || carInfo.MODELL.Equals("G4IBF3") || carInfo.MODELL.Equals("G4ICF3"))
-                {
+                    carInfo.MODELL.Equals("G4ICC3") || carInfo.MODELL.Equals("G4IBF3") || carInfo.MODELL.Equals("G4ICF3")) {
                     return 4;
                 }
             }
             return 0;
         }
 
-        public int CheckCarHUDType(string rfid)
-        {
+        public int CheckCarHUDType(string rfid) {
             CarInfo_OnLineState carInfo = GetCarInfoState(rfid);
             return GetHUDType(carInfo);
         }
 
-        public int GetHUDType(CarInfo_OnLineState carInfo)
-        {
-            if (carInfo != null)
-            {
+        public int GetHUDType(CarInfo_OnLineState carInfo) {
+            if (carInfo != null) {
                 mL.ShowLog("CarInfo : " + carInfo.MODELL + " " + carInfo.HUD, LogType.FIS);
                 if (carInfo.HUD.Equals("KS3"))
                     return 1;
@@ -310,13 +258,10 @@ namespace MEB_ARHUD_Calibration.Logic
             return 0;
         }
 
-        public CarInfo_OnLineState GetCarInfoState(string rfid)
-        {
+        public CarInfo_OnLineState GetCarInfoState(string rfid) {
             mL.ShowLog("RFID : " + rfid, LogType.FIS);
-            foreach (CarInfo_OnLineState car in Cars)
-            {
-                if (rfid.Contains(car.PIN))
-                {
+            foreach (CarInfo_OnLineState car in Cars) {
+                if (rfid.Contains(car.PIN)) {
                     return car;
                 }
             }
@@ -325,23 +270,17 @@ namespace MEB_ARHUD_Calibration.Logic
             return null;
         }
 
-        public CarInfo_OnLineState SetNextNeedTestCar()
-        {
-            if (CurrentRFIDCar != null)
-            {
+        public CarInfo_OnLineState SetNextNeedTestCar() {
+            if (CurrentRFIDCar != null) {
                 mL.ShowLog("GetNeedCheckCar " + CurrentRFIDCar.SequenceNumber, LogType.FIS);
                 bool beginCheck = false;
 
                 mL.ShowLog("Car Count " + Cars.Count, LogType.FIS);
-                for(int i = 0; i < Cars.Count; i++)
-                {
+                for (int i = 0; i < Cars.Count; i++) {
                     CarInfo_OnLineState car = Cars[i];
-                    if(beginCheck)
-                    {
-                        if(GetHUDType(car) > 0)
-                        {
-                            if(CheckCarTypeNeedTestByConfig(car))
-                            {
+                    if (beginCheck) {
+                        if (GetHUDType(car) > 0) {
+                            if (CheckCarTypeNeedTestByConfig(car)) {
                                 mL.ShowLog("Find Car " + car.SequenceNumber + " i: " + i + " Count: " + Cars.Count, LogType.FIS);
                                 NextNeedTestCar = car;
                                 return car;
@@ -350,8 +289,7 @@ namespace MEB_ARHUD_Calibration.Logic
                         }
                     }
 
-                    if(CurrentRFIDCar.VIN.Equals(car.VIN))
-                    {
+                    if (CurrentRFIDCar.VIN.Equals(car.VIN)) {
                         mL.ShowLog("Find Current Index " + car.SequenceNumber + " i: " + i + " Count: " + Cars.Count, LogType.FIS);
                         beginCheck = true;
                     }
@@ -361,11 +299,9 @@ namespace MEB_ARHUD_Calibration.Logic
             return null;
         }
 
-        private bool CheckCarTypeNeedTestByConfig(CarInfo_OnLineState car)
-        {
+        private bool CheckCarTypeNeedTestByConfig(CarInfo_OnLineState car) {
             ProjectType type = GetCarType(GetCarType(car));
-            switch (type)
-            {
+            switch (type) {
                 case ProjectType.Unknown:
                     break;
                 case ProjectType.ID3:

@@ -1,28 +1,21 @@
-﻿using MEB_ARHUD_Calibration.Data;
+﻿using MEB_ARHUD_Calibration.Models;
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 
-namespace MEB_ARHUD_Calibration.Common
-{
-    class XMLUtil
-    {
-        public static User[] GetAllUsers()
-        {
+namespace MEB_ARHUD_Calibration.Common {
+    class XMLUtil {
+        public static User[] GetAllUsers() {
             return GetAllUsers(@"Config\UserConfig.xml");
         }
 
-        private static User[] GetAllUsers(string fileName)
-        {
+        private static User[] GetAllUsers(string fileName) {
             XmlDocument xmldoc = new XmlDocument();
-            try
-            {
+            try {
                 xmldoc.Load(fileName);
             }
-            catch (Exception)
-            {
+            catch (Exception) {
                 return new User[0];
             }
 
@@ -31,8 +24,7 @@ namespace MEB_ARHUD_Calibration.Common
 
             List<User> userslist = new List<User>();
 
-            foreach (XmlNode node in nodes)
-            {
+            foreach (XmlNode node in nodes) {
                 XmlElement oneEle = node as XmlElement;
 
                 string name = oneEle.GetAttribute("name");
@@ -48,20 +40,16 @@ namespace MEB_ARHUD_Calibration.Common
             return userslist.ToArray();
         }
 
-        public static void ResetAllUser(User[] users)
-        {
+        public static void ResetAllUser(User[] users) {
             ResetAllUser(@"Config\UserConfig.xml", users);
         }
 
-        private static void ResetAllUser(string fileName, User[] users)
-        {
+        private static void ResetAllUser(string fileName, User[] users) {
             XmlDocument xmldoc = new XmlDocument();
-            try
-            {
+            try {
                 xmldoc.Load(fileName);
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Console.WriteLine(e.Message);
                 return;
             }
@@ -71,8 +59,7 @@ namespace MEB_ARHUD_Calibration.Common
             XmlElement oneEle = nodes[0] as XmlElement;
             oneEle.RemoveAll();
 
-            foreach (User user in users)
-            {
+            foreach (User user in users) {
                 XmlElement newNode = xmldoc.CreateElement("user");
                 newNode.SetAttribute("name", user.Name);
                 newNode.SetAttribute("password", user.PasswordString);
@@ -83,8 +70,7 @@ namespace MEB_ARHUD_Calibration.Common
             xmldoc.Save(fileName);
         }
 
-        public static int[] GetCameraCenterFromProjectConfigXml(string fileName)
-        {
+        public static int[] GetCameraCenterFromProjectConfigXml(string fileName) {
             XmlDocument xmldoc = new XmlDocument();
 
             xmldoc.Load(fileName);
@@ -102,18 +88,15 @@ namespace MEB_ARHUD_Calibration.Common
             return new int[] { centerX, centerY, offsetX, offsetY };
         }
 
-        public static void SetCameraCenterFromProjectConfigXml(string fileName, int X, int Y)
-        {
+        public static void SetCameraCenterFromProjectConfigXml(string fileName, int X, int Y) {
             XmlDocument xmldoc = new XmlDocument();
-            try
-            {
+            try {
                 xmldoc.Load(fileName);
 
                 XmlElement root = xmldoc.DocumentElement;
 
                 XmlNodeList nodes = root.GetElementsByTagName("Center");
-                foreach (XmlNode node in nodes)
-                {
+                foreach (XmlNode node in nodes) {
                     XmlElement oneEle = node as XmlElement;
                     oneEle.SetAttribute("CC_X", X + "");
                     oneEle.SetAttribute("CC_Y", Y + "");
@@ -121,24 +104,20 @@ namespace MEB_ARHUD_Calibration.Common
                     return;
                 }
             }
-            catch (Exception)
-            {
+            catch (Exception) {
             }
         }
 
 
-        public static void UpdateNextCarInfoToSystemConfigXml(string fileName, ProjectType type, string vin)
-        {
+        public static void UpdateNextCarInfoToSystemConfigXml(string fileName, ProjectType type, string vin) {
             XmlDocument xmldoc = new XmlDocument();
-            try
-            {
+            try {
                 xmldoc.Load(fileName);
 
                 XmlElement root = xmldoc.DocumentElement;
                 XmlNodeList nodes = root.GetElementsByTagName("NextCar");
 
-                foreach (XmlNode node in nodes)
-                {
+                foreach (XmlNode node in nodes) {
                     XmlElement oneEle = node as XmlElement;
 
                     oneEle.SetAttribute("type", type + "");
@@ -148,21 +127,19 @@ namespace MEB_ARHUD_Calibration.Common
                 xmldoc.Save(fileName);
 
             }
-            catch (Exception)
-            {
+            catch (Exception) {
                 return;
             }
         }
 
-        public static void InitConfigsFromSystemConfigXml(string fileName)
-        {
+        public static void InitConfigsFromSystemConfigXml(string fileName) {
             XmlDocument xmldoc = new XmlDocument();
 
             xmldoc.Load(fileName);
             XmlElement root = xmldoc.DocumentElement;
-            
+
             string CarType = GetAttr(root, "NextCar", "type");
-            Config.ProjectType = (ProjectType)Enum.Parse(typeof(ProjectType), CarType);
+            Config.CurrentProject = (ProjectType)Enum.Parse(typeof(ProjectType), CarType);
 
             Config.NeedTest_ID3 = GetBoolAttr(root, "NeedTest", "ID3");
             Config.NeedTest_ID4X = GetBoolAttr(root, "NeedTest", "ID4X");
@@ -176,41 +153,35 @@ namespace MEB_ARHUD_Calibration.Common
         }
 
 
-        public static string GetAttr(XmlElement root, string elementName, string attrName)
-        {
+        public static string GetAttr(XmlElement root, string elementName, string attrName) {
             XmlElement? element = root.GetElementsByTagName(elementName).OfType<XmlElement>().FirstOrDefault();
             return element?.GetAttribute(attrName) ?? string.Empty;
         }
 
 
-        public static bool GetBoolAttr(XmlElement root, string elementName, string attrName)
-        {
+        public static bool GetBoolAttr(XmlElement root, string elementName, string attrName) {
             string attr = GetAttr(root, elementName, attrName);
             if (bool.TryParse(attr, out bool value))
                 return value;
             return false;
         }
 
-        public static void UpdateAttrToXml(string fileName, string elementName, string attrName, string value)
-        {
+        public static void UpdateAttrToXml(string fileName, string elementName, string attrName, string value) {
             XmlDocument xmldoc = new XmlDocument();
-            try
-            {
+            try {
                 xmldoc.Load(fileName);
 
                 XmlElement root = xmldoc.DocumentElement;
 
                 XmlNodeList nodes = root.GetElementsByTagName(elementName);
-                foreach (XmlNode node in nodes)
-                {
+                foreach (XmlNode node in nodes) {
                     XmlElement oneEle = node as XmlElement;
                     oneEle.SetAttribute(attrName, value);
                     xmldoc.Save(fileName);
                     return;
                 }
             }
-            catch (Exception)
-            {
+            catch (Exception) {
                 return;
             }
         }

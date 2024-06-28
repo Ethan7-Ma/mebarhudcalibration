@@ -25,6 +25,7 @@
     <PackageReference Include="Emgu.CV.runtime.windows" Version="4.9.0.5494" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NModbus" Version="3.0.81" />
+    <PackageReference Include="RestSharp" Version="111.3.0" />
   </ItemGroup>
 
   <ItemGroup>

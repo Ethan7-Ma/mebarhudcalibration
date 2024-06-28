@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace MEB_ARHUD_Calibration.Data
-{
-    class CarInfo
-    {
+﻿namespace MEB_ARHUD_Calibration.Models {
+    class CarInfo {
         public int SequenceNumber { get; set; }
         public string PIN { get; set; }
         public string VIN { get; set; }

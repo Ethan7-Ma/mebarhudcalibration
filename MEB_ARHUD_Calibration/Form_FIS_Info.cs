@@ -1,25 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Globalization;
+﻿using MEB_ARHUD_Calibration.Common;
 using MEB_ARHUD_Calibration.Logic;
-using MEB_ARHUD_Calibration.Common;
-using MEB_ARHUD_Calibration.Data;
+using MEB_ARHUD_Calibration.Models;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Windows.Forms;
 
 
-namespace MEB_ARHUD_Calibration
-{
-    public partial class Form_FIS_Info : Form
-    {
-        public Form_FIS_Info()
-        {
+namespace MEB_ARHUD_Calibration {
+    public partial class Form_FIS_Info : Form {
+        public Form_FIS_Info() {
             InitializeComponent();
             InitCounts();
         }
@@ -27,25 +19,20 @@ namespace MEB_ARHUD_Calibration
         FISLogic fL = FISLogic.GetInstance();
         ExportLogic eL = ExportLogic.GetInstance();
 
-        private void InitCounts()
-        {
+        private void InitCounts() {
             CarCount_OK = new Dictionary<ProjectType, int>();
             CarCount_NG = new Dictionary<ProjectType, int>();
             CarCount_NULL = new Dictionary<ProjectType, int>();
 
-            foreach (ProjectType type in Enum.GetValues(typeof(ProjectType)))
-            {
+            foreach (ProjectType type in Enum.GetValues(typeof(ProjectType))) {
                 CarCount_OK.Add(type, 0);
                 CarCount_NG.Add(type, 0);
                 CarCount_NULL.Add(type, 0);
             }
 
-            try
-            {
-                foreach (ProjectType type in Enum.GetValues(typeof(ProjectType)))
-                {
-                    if(type != ProjectType.Unknown)
-                    {
+            try {
+                foreach (ProjectType type in Enum.GetValues(typeof(ProjectType))) {
+                    if (type != ProjectType.Unknown) {
                         DataGridView_Count.Rows.Add(new string[] { type + "", "", "", "", "" });
 
                     }
@@ -54,35 +41,30 @@ namespace MEB_ARHUD_Calibration
             catch { }
         }
 
-        private void Button_SelectAll_Click(object sender, EventArgs e)
-        {
-            try
-            {
+        private void Button_SelectAll_Click(object sender, EventArgs e) {
+            try {
                 List<CarInfo_OnLineState> allCars = fL.Cars;
 
                 List<CarInfo_OnLineState> allHUDCars = new List<CarInfo_OnLineState>();
 
                 DataGridView_Infos.Rows.Clear();
 
-                foreach (CarInfo_OnLineState one in allCars)
-                {
+                foreach (CarInfo_OnLineState one in allCars) {
                     int hudType = fL.GetHUDType(one);
-                   //if (hudType > 0)
-                   //{
-                        ProjectType type = fL.GetCarType(fL.GetCarType(one));
+                    //if (hudType > 0)
+                    //{
+                    ProjectType type = fL.GetCarType(fL.GetCarType(one));
 
-                        DataGridView_Infos.Rows.Add(new string[] { one.SequenceNumber + "", one.VIN, type + "", one.HUD });
+                    DataGridView_Infos.Rows.Add(new string[] { one.SequenceNumber + "", one.VIN, type + "", one.HUD });
                     //}
                 }
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
 
             }
         }
 
-        private void Button_SelectBySeq_Click(object sender, EventArgs e)
-        {
+        private void Button_SelectBySeq_Click(object sender, EventArgs e) {
             GetTargetDateTimeTestResults();
             GetTargetSeqCars();
             RefreshDataGridViewByTargetCars();
@@ -94,8 +76,7 @@ namespace MEB_ARHUD_Calibration
         List<SendPostObj> fis_ID6X = new List<SendPostObj>();
         List<SendPostObj> fis_AUDI = new List<SendPostObj>();
 
-        private void GetTargetDateTimeTestResults()
-        {
+        private void GetTargetDateTimeTestResults() {
             DateTime time = DateTimePicker_Time.Value;
             Console.WriteLine(time.Year + " " + time.Month + " " + time.Day);
 
@@ -114,26 +95,21 @@ namespace MEB_ARHUD_Calibration
             fis_AUDI = GetFisDatasFromFile(fileName_AUDI);
         }
 
-        private List<SendPostObj> GetFisDatasFromFile(string fileName)
-        {
+        private List<SendPostObj> GetFisDatasFromFile(string fileName) {
             List<SendPostObj> fisDatas = new List<SendPostObj>();
 
-            if (File.Exists(fileName))
-            {
-                string fileText = TextUtil.LoadStringFromFile(fileName);
+            if (File.Exists(fileName)) {
+                string fileText = File.ReadAllText(fileName);
 
                 string[] lines = fileText.Trim().Split('\n');
 
-                foreach (string oneLine in lines)
-                {
+                foreach (string oneLine in lines) {
                     List<string> datas = oneLine.Split(',').Select(s => s.Trim()).ToList();
-                    if (datas.Count >= 6)
-                    {
+                    if (datas.Count >= 6) {
                         int.TryParse(datas[0], out int seq);
                         SendPostObj fisData = new SendPostObj(seq, datas[1], datas[2], datas[3], datas[4], datas[5]);
 
-                        if(datas.Count >= 7)
-                        {
+                        if (datas.Count >= 7) {
                             string time_str = datas[6];
 
                             DateTime time = DateTime.MinValue;
@@ -154,52 +130,43 @@ namespace MEB_ARHUD_Calibration
 
         List<CarInfo_OnLineState> targetCars = new List<CarInfo_OnLineState>();
 
-        private void GetTargetSeqCars()
-        {
+        private void GetTargetSeqCars() {
             int start = 0;
             int end = 9999;
             int.TryParse(TextBox_Seq_Start.Text, out start);
             int.TryParse(TextBox_Seq_End.Text, out end);
 
-            try
-            {
+            try {
                 List<CarInfo_OnLineState> allCars = fL.Cars;
 
                 targetCars = new List<CarInfo_OnLineState>();
 
                 bool flag = false;
 
-                for (int i = 0; i < allCars.Count; i++)
-                {
+                for (int i = 0; i < allCars.Count; i++) {
                     CarInfo_OnLineState one = allCars[i];
                     if (one.SequenceNumber == start)
                         flag = true;
                     if (one.SequenceNumber == end)
                         flag = false;
-                    if (flag)
-                    {
+                    if (flag) {
                         int hudType = fL.GetHUDType(one);
-                        if (hudType > 0)
-                        {
+                        if (hudType > 0) {
                             InitTestResult(one);
                             targetCars.Add(one);
                         }
                     }
                 }
             }
-            catch
-            {
+            catch {
 
             }
         }
 
-        private void RefreshDataGridViewByTargetCars()
-        {
-            try
-            {
+        private void RefreshDataGridViewByTargetCars() {
+            try {
                 DataGridView_Infos.Rows.Clear();
-                foreach (CarInfo_OnLineState car in targetCars)
-                {
+                foreach (CarInfo_OnLineState car in targetCars) {
                     ProjectType type = fL.GetCarType(fL.GetCarType(car));
                     string state = "";
                     if (car.State == CarTestState.OK)
@@ -210,8 +177,7 @@ namespace MEB_ARHUD_Calibration
                     DataGridView_Infos.Rows.Add(new string[] { car.SequenceNumber + "", car.VIN, type + "", car.HUD, state, car.Time });
                 }
             }
-            catch 
-            {
+            catch {
 
             }
         }
@@ -220,35 +186,29 @@ namespace MEB_ARHUD_Calibration
         Dictionary<ProjectType, int> CarCount_NG = new Dictionary<ProjectType, int>();
         Dictionary<ProjectType, int> CarCount_NULL = new Dictionary<ProjectType, int>();
 
-        private void InitCarTestCount()
-        {
-            try
-            {
-                foreach (ProjectType type in Enum.GetValues(typeof(ProjectType)))
-                {
+        private void InitCarTestCount() {
+            try {
+                foreach (ProjectType type in Enum.GetValues(typeof(ProjectType))) {
                     CarCount_OK[type] = 0;
                     CarCount_NG[type] = 0;
                     CarCount_NULL[type] = 0;
                 }
 
-                foreach (CarInfo_OnLineState car in targetCars)
-                {
+                foreach (CarInfo_OnLineState car in targetCars) {
                     ProjectType type = fL.GetCarType(fL.GetCarType(car));
-                    if (car.State == CarTestState.OK)
-                    {
+                    if (car.State == CarTestState.OK) {
                         CarCount_OK[type]++;
-                    } else if (car.State == CarTestState.NG)
-                    {
+                    }
+                    else if (car.State == CarTestState.NG) {
                         CarCount_NG[type]++;
-                    } else
-                    {
+                    }
+                    else {
                         CarCount_NULL[type]++;
                     }
                 }
 
                 int rowIndex = 0;
-                foreach (ProjectType type in Enum.GetValues(typeof(ProjectType)))
-                {
+                foreach (ProjectType type in Enum.GetValues(typeof(ProjectType))) {
                     if (type == ProjectType.Unknown)
                         continue;
 
@@ -262,22 +222,19 @@ namespace MEB_ARHUD_Calibration
                     rowIndex++;
                 }
             }
-            catch 
-            {
+            catch {
 
             }
         }
 
 
-        private void InitTestResult(CarInfo_OnLineState car)
-        {
+        private void InitTestResult(CarInfo_OnLineState car) {
             car.Time = "";
             ProjectType type = fL.GetCarType(fL.GetCarType(car));
 
             List<SendPostObj> fisDatas = new List<SendPostObj>();
 
-            switch (type)
-            {
+            switch (type) {
                 case ProjectType.Unknown:
                     break;
                 case ProjectType.ID3:
@@ -296,16 +253,13 @@ namespace MEB_ARHUD_Calibration
                     break;
             }
 
-            foreach(SendPostObj obj in fisDatas)
-            {
-                if(obj.VIN.Equals(car.VIN))
-                {
+            foreach (SendPostObj obj in fisDatas) {
+                if (obj.VIN.Equals(car.VIN)) {
                     if (obj.Result.Equals("1"))
                         car.State = CarTestState.OK;
                     else
                         car.State = CarTestState.NG;
-                    if (obj.Time > DateTime.MinValue)
-                    {
+                    if (obj.Time > DateTime.MinValue) {
                         car.Time_FIS = obj.Time;
                         car.Time = obj.Time.ToString("HH:mm:ss");
                     }
@@ -314,14 +268,11 @@ namespace MEB_ARHUD_Calibration
 
         }
 
-        private void Button_ExportSelect_Click(object sender, EventArgs e)
-        {
-            try
-            {
+        private void Button_ExportSelect_Click(object sender, EventArgs e) {
+            try {
                 List<List<string>> allLines = new List<List<string>>();
 
-                foreach (CarInfo_OnLineState car in targetCars)
-                {
+                foreach (CarInfo_OnLineState car in targetCars) {
                     List<string> oneLine = new List<string>();
                     oneLine.Add(car.SequenceNumber + "");
                     oneLine.Add(car.VIN);
@@ -338,22 +289,19 @@ namespace MEB_ARHUD_Calibration
 
                 eL.SaveOneDayAllResultToCSV(allLines);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
 
             }
         }
 
-        private void Button_SelectByTime_Click(object sender, EventArgs e)
-        {
+        private void Button_SelectByTime_Click(object sender, EventArgs e) {
             GetTargetDateTimeTestResults();
             GetTargetTimeCars();
             RefreshDataGridViewByTargetCars();
             InitCarTestCount();
         }
 
-        private void GetTargetTimeCars()
-        {
+        private void GetTargetTimeCars() {
             int start = 0;
             int end = 9999;
             int.TryParse(TextBox_Seq_Start.Text, out start);
@@ -362,8 +310,7 @@ namespace MEB_ARHUD_Calibration
             DateTime startTime = DateTimePicker_Start.Value;
             DateTime endTime = DateTimePicker_End.Value;
 
-            try
-            {
+            try {
                 List<CarInfo_OnLineState> allCars = fL.Cars;
 
                 targetCars = new List<CarInfo_OnLineState>();
@@ -372,40 +319,34 @@ namespace MEB_ARHUD_Calibration
 
                 bool flag = false;
 
-                for (int i = 0; i < allCars.Count; i++)
-                {
+                for (int i = 0; i < allCars.Count; i++) {
                     CarInfo_OnLineState one = allCars[i];
                     if (one.SequenceNumber >= start)
                         flag = true;
                     if (one.SequenceNumber >= end)
                         flag = false;
-                    if (flag)
-                    {
+                    if (flag) {
                         int hudType = fL.GetHUDType(one);
-                        if (hudType > 0)
-                        {
+                        if (hudType > 0) {
                             InitTestResult(one);
                             cars_Seq.Add(one);
                         }
                     }
                 }
 
-                for(int i = 0; i < cars_Seq.Count; i++)
-                {
+                for (int i = 0; i < cars_Seq.Count; i++) {
                     CarInfo_OnLineState one = cars_Seq[i];
                     if (one.Time_FIS > startTime)
                         flag = true;
                     if (one.Time_FIS > endTime)
                         flag = false;
 
-                    if(flag)
-                    {
+                    if (flag) {
                         targetCars.Add(one);
                     }
                 }
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
 
             }
         }

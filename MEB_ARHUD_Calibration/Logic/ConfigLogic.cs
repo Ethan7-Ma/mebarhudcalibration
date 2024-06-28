@@ -1,43 +1,31 @@
-﻿using System;
+﻿using MEB_ARHUD_Calibration.Common;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MEB_ARHUD_Calibration.Common;
-using MEB_ARHUD_Calibration.Data;
 
-namespace MEB_ARHUD_Calibration.Logic
-{
-    class ConfigLogic
-    {
+namespace MEB_ARHUD_Calibration.Logic {
+    class ConfigLogic {
         private static ConfigLogic instance = null;
 
-        public static ConfigLogic GetInstance()
-        {
+        public static ConfigLogic GetInstance() {
             if (instance == null)
                 instance = new ConfigLogic();
             return instance;
         }
 
-        private ConfigLogic()
-        {
+        private ConfigLogic() {
 
         }
 
         public List<string> List_CameraConfigFileName = new List<string>();
 
-        public void SaveNextCarInfo(ProjectType type, string vin)
-        {
+        public void SaveNextCarInfo(ProjectType type, string vin) {
             XMLUtil.UpdateNextCarInfoToSystemConfigXml(@"Config\SysConfig.xml", type, vin);
         }
 
-        public void LoadSystemConfig()
-        {
+        public void LoadSystemConfig() {
             XMLUtil.InitConfigsFromSystemConfigXml(@"Config\SysConfig.xml");
         }
 
-        public void LoadCameraConfig()
-        {
+        public void LoadCameraConfig() {
             List_CameraConfigFileName.Add(@"Config\ID3\icImagingControlDeviceState.txt");
             List_CameraConfigFileName.Add(@"Config\ID4X\icImagingControlDeviceState.txt");
             List_CameraConfigFileName.Add(@"Config\ID6X\icImagingControlDeviceState.txt");
@@ -95,100 +83,84 @@ namespace MEB_ARHUD_Calibration.Logic
             Config.Camera_OffsetY.Add(ProjectType.AUDIN, camera_Center_AudiN[3]);
         }
 
-        public void SaveID3CameraCalibration(int X, int Y)
-        {
+        public void SaveID3CameraCalibration(int X, int Y) {
             Config.Camera_MoveX[ProjectType.ID3] = X;
             Config.Camera_MoveY[ProjectType.ID3] = Y;
             XMLUtil.SetCameraCenterFromProjectConfigXml(@"Config\ID3\config.xml", X, Y);
         }
 
-        public void SaveID4XCameraCalibration(int X, int Y)
-        {
+        public void SaveID4XCameraCalibration(int X, int Y) {
             Config.Camera_MoveX[ProjectType.ID4X] = X;
             Config.Camera_MoveY[ProjectType.ID4X] = Y;
             XMLUtil.SetCameraCenterFromProjectConfigXml(@"Config\ID4X\config.xml", X, Y);
         }
 
-        public void SaveID6XCameraCalibration(int X, int Y)
-        {
+        public void SaveID6XCameraCalibration(int X, int Y) {
             Config.Camera_MoveX[ProjectType.ID6X] = X;
             Config.Camera_MoveY[ProjectType.ID6X] = Y;
             XMLUtil.SetCameraCenterFromProjectConfigXml(@"Config\ID6X\config.xml", X, Y);
         }
 
-        public void SaveAUDICameraCalibration(int X, int Y)
-        {
+        public void SaveAUDICameraCalibration(int X, int Y) {
             Config.Camera_MoveX[ProjectType.AUDI] = X;
             Config.Camera_MoveY[ProjectType.AUDI] = Y;
             XMLUtil.SetCameraCenterFromProjectConfigXml(@"Config\AUDI\config.xml", X, Y);
         }
 
-        public void SaveID3NCameraCalibration(int X, int Y)
-        {
+        public void SaveID3NCameraCalibration(int X, int Y) {
             Config.Camera_MoveX[ProjectType.ID3N] = X;
             Config.Camera_MoveY[ProjectType.ID3N] = Y;
             XMLUtil.SetCameraCenterFromProjectConfigXml(@"Config\ID3N\config.xml", X, Y);
         }
 
-        public void SaveID4XNCameraCalibration(int X, int Y)
-        {
+        public void SaveID4XNCameraCalibration(int X, int Y) {
             Config.Camera_MoveX[ProjectType.ID4XN] = X;
             Config.Camera_MoveY[ProjectType.ID4XN] = Y;
             XMLUtil.SetCameraCenterFromProjectConfigXml(@"Config\ID4XN\config.xml", X, Y);
         }
 
-        public void SaveID6XNCameraCalibration(int X, int Y)
-        {
+        public void SaveID6XNCameraCalibration(int X, int Y) {
             Config.Camera_MoveX[ProjectType.ID6XN] = X;
             Config.Camera_MoveY[ProjectType.ID6XN] = Y;
             XMLUtil.SetCameraCenterFromProjectConfigXml(@"Config\ID6XN\config.xml", X, Y);
         }
 
-        public void SaveAUDINCameraCalibration(int X, int Y)
-        {
+        public void SaveAUDINCameraCalibration(int X, int Y) {
             Config.Camera_MoveX[ProjectType.AUDIN] = X;
             Config.Camera_MoveY[ProjectType.AUDIN] = Y;
             XMLUtil.SetCameraCenterFromProjectConfigXml(@"Config\AUDIN\config.xml", X, Y);
         }
 
 
-        public void SaveID3NeedTest(bool NeedTest)
-        {
+        public void SaveID3NeedTest(bool NeedTest) {
             XMLUtil.UpdateAttrToXml(@"Config\SysConfig.xml", "NeedTest", "ID3", NeedTest + "");
         }
 
-        public void SaveID4XNeedTest(bool NeedTest)
-        {
+        public void SaveID4XNeedTest(bool NeedTest) {
             XMLUtil.UpdateAttrToXml(@"Config\SysConfig.xml", "NeedTest", "ID4X", NeedTest + "");
         }
 
-        public void SaveID6XNeedTest(bool NeedTest)
-        {
+        public void SaveID6XNeedTest(bool NeedTest) {
             XMLUtil.UpdateAttrToXml(@"Config\SysConfig.xml", "NeedTest", "ID6X", NeedTest + "");
         }
 
-        public void SaveAUDINeedTest(bool NeedTest)
-        {
+        public void SaveAUDINeedTest(bool NeedTest) {
             XMLUtil.UpdateAttrToXml(@"Config\SysConfig.xml", "NeedTest", "AUDI", NeedTest + "");
         }
 
-        public void SaveID3NNeedTest(bool NeedTest)
-        {
+        public void SaveID3NNeedTest(bool NeedTest) {
             XMLUtil.UpdateAttrToXml(@"Config\SysConfig.xml", "NeedTest", "ID3N", NeedTest + "");
         }
 
-        public void SaveID4XNNeedTest(bool NeedTest)
-        {
+        public void SaveID4XNNeedTest(bool NeedTest) {
             XMLUtil.UpdateAttrToXml(@"Config\SysConfig.xml", "NeedTest", "ID4XN", NeedTest + "");
         }
 
-        public void SaveID6XNNeedTest(bool NeedTest)
-        {
+        public void SaveID6XNNeedTest(bool NeedTest) {
             XMLUtil.UpdateAttrToXml(@"Config\SysConfig.xml", "NeedTest", "ID6XN", NeedTest + "");
         }
 
-        public void SaveAUDINNeedTest(bool NeedTest)
-        {
+        public void SaveAUDINNeedTest(bool NeedTest) {
             XMLUtil.UpdateAttrToXml(@"Config\SysConfig.xml", "NeedTest", "AUDIN", NeedTest + "");
         }
     }

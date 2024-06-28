@@ -1,29 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Security.Cryptography;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 
-namespace MEB_ARHUD_Calibration.Common
-{
-    class CryptoUtil
-    {
-        static string KEY = "mebarhud";
+namespace MEB_ARHUD_Calibration.Common {
+    static class CryptoUtil {
+        static readonly string KEY = "mebarhud";
 
-        public static string DesEncode(string plain)
-        {
+        public static string DesEncode(string plain) {
             byte[] bytesCipher;
             byte[] keyBytes = Encoding.UTF8.GetBytes(KEY);
             byte[] ivBytes = keyBytes;
 
-            DESCryptoServiceProvider des = new DESCryptoServiceProvider();
+            DESCryptoServiceProvider des = new();
 
-            using (MemoryStream msEncrypt = new MemoryStream())
-            {
-                CryptoStream csEncrypt = new CryptoStream(msEncrypt, des.CreateEncryptor(keyBytes, ivBytes),
+            using (MemoryStream msEncrypt = new()) {
+                CryptoStream csEncrypt = new(msEncrypt, des.CreateEncryptor(keyBytes, ivBytes),
                     CryptoStreamMode.Write);
-                StreamWriter swEncrypt = new StreamWriter(csEncrypt);
+                StreamWriter swEncrypt = new(csEncrypt);
                 swEncrypt.WriteLine(plain);
                 swEncrypt.Close();
                 csEncrypt.Close();
@@ -34,40 +28,17 @@ namespace MEB_ARHUD_Calibration.Common
             return Convert.ToBase64String(bytesCipher);
         }
 
-        public static string DesDeCode(string cipher)
-        {
+        public static string DesDeCode(string cipher) {
             string strPlainText = "";
-            byte[] cipherByte = new byte[0];
-            try
-            {
-                cipherByte = Convert.FromBase64String(cipher);
-            }
-            catch (Exception e)
-            {
-                return e.Message;
-            }
-
+            byte[] cipherByte = Convert.FromBase64String(cipher);
             byte[] keyBytes = Encoding.UTF8.GetBytes(KEY);
             byte[] ivBytes = keyBytes;
-            DESCryptoServiceProvider des = new DESCryptoServiceProvider();
-            using (MemoryStream msDecrypt = new MemoryStream(cipherByte))
-            {
-                CryptoStream csDecrypt = null;
-                StreamReader srDecrypt = null;
-                try
-                {
-                    csDecrypt = new CryptoStream(msDecrypt, des.CreateDecryptor(keyBytes, ivBytes), CryptoStreamMode.Read);
-                    srDecrypt = new StreamReader(csDecrypt);
-                    strPlainText = srDecrypt.ReadLine();
-                }
-                finally
-                {
-                    srDecrypt.Close();
-                    csDecrypt.Close();
-                    msDecrypt.Close();
-                }
+            DESCryptoServiceProvider des = new();
+            using (MemoryStream msDecrypt = new(cipherByte)) {
+                CryptoStream csDecrypt = new(msDecrypt, des.CreateDecryptor(keyBytes, ivBytes), CryptoStreamMode.Read);
+                StreamReader srDecrypt = new(csDecrypt);
+                strPlainText = srDecrypt.ReadLine();
             }
-
             return strPlainText;
         }
     }

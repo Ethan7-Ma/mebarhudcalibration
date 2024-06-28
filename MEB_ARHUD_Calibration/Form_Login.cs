@@ -1,41 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
+﻿using MEB_ARHUD_Calibration.Logic;
+using System;
 using System.Windows.Forms;
-using MEB_ARHUD_Calibration.Logic;
 
-namespace MEB_ARHUD_Calibration
-{
-    public partial class Form_Login : Form
-    {
-        public Form_Login()
-        {
+namespace MEB_ARHUD_Calibration {
+    public partial class Form_Login : Form {
+        public Form_Login() {
             InitializeComponent();
         }
 
         UserLogic uL = UserLogic.GetInstance();
 
-        private void Button_Login_Click(object sender, EventArgs e)
-        {
+        private void Button_Login_Click(object sender, EventArgs e) {
             string userAccount = TextBox_UserAccount.Text;
             string userPassword = TextBox_UserPassword.Text;
 
-            if (Login(userAccount, userPassword))
-            {
+            if (Login(userAccount, userPassword)) {
                 LoginFormCloseWithSuccess();
             }
         }
 
-        private bool Login(string userName, string password)
-        {
+        private bool Login(string userName, string password) {
             return true;
             LoginResult loginResult = uL.Login(userName, password);
-            switch (loginResult)
-            {
+            switch (loginResult) {
                 case LoginResult.UnknowFail:
                     MessageBox.Show("登录信息异常");
                     break;
@@ -57,9 +44,8 @@ namespace MEB_ARHUD_Calibration
             return false;
         }
 
-        private void LoginFormCloseWithSuccess()
-        {
-            
+        private void LoginFormCloseWithSuccess() {
+
 
             this.DialogResult = DialogResult.OK;
         }

@@ -25,11 +25,11 @@ namespace MEB_ARHUD_Calibration.Logic {
 
         MessageLogic mL = MessageLogic.GetInstance();
 
-        public event CameraNewFrameDelegateFunction CameraNewFrameEvent;
+        public event Action<Bitmap>? CameraNewFrameEvent;
 
-        private event DeviceStateChangedDelegateFunction DeviceChangeEvent = null;
+        private event Action<bool>? DeviceChangeEvent;
 
-        public event DeviceStateChangedDelegateFunction CameraDeviceChangeEvent {
+        public event Action<bool> CameraDeviceChangeEvent {
             add { DeviceChangeEvent += value; }
             remove { }
         }
@@ -52,7 +52,7 @@ namespace MEB_ARHUD_Calibration.Logic {
         }
 
         public void SwitchCameraWithCurrentProject() {
-            switch (Config.ProjectType) {
+            switch (Config.CurrentProject) {
                 case ProjectType.ID3:
                     SwitchCameraWithIndex(0);
                     break;

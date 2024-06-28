@@ -1,30 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
+﻿using MEB_ARHUD_Calibration.Common;
+using MEB_ARHUD_Calibration.Models;
+using System;
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
-using MEB_ARHUD_Calibration.Data;
-using MEB_ARHUD_Calibration.Common;
 
-namespace MEB_ARHUD_Calibration.Logic
-{
-    class TestLogic
-    {
+namespace MEB_ARHUD_Calibration.Logic {
+    class TestLogic {
         private static TestLogic instance = null;
 
-        public static TestLogic GetInstance()
-        {
+        public static TestLogic GetInstance() {
             if (instance == null)
                 instance = new TestLogic();
             return instance;
         }
 
-        private TestLogic()
-        {
-            
+        private TestLogic() {
+
         }
 
         public event Action CarTestFinish = null;
@@ -50,8 +42,7 @@ namespace MEB_ARHUD_Calibration.Logic
         private DateTime StartTime;
         private int CurrentTestIndex = 0;
 
-        public void TestAnalyseImageCenterWithCalcAngle()
-        {
+        public void TestAnalyseImageCenterWithCalcAngle() {
             Task.Factory.StartNew(() => {
                 Bitmap bitmap = camL.GetCurrentBitmap();
                 string fileName = GetImageSaveFileName("Test");
@@ -77,8 +68,7 @@ namespace MEB_ARHUD_Calibration.Logic
             });
         }
 
-        public void TestAnalyseImageCenterWithCalcAngle_ForTest(string fileName)
-        {
+        public void TestAnalyseImageCenterWithCalcAngle_ForTest(string fileName) {
             Task.Factory.StartNew(() => {
                 Point center = iaL.TestGetCircle(fileName);
                 Point centerMoved = GetCenterPointMoved(center);
@@ -100,21 +90,18 @@ namespace MEB_ARHUD_Calibration.Logic
             });
         }
 
-        public Point GetCenterPointMoved(Point center)
-        {
-            int moveX = center.X - (ImageAnalyseLogic.ImageWidth / 2 + Config.Camera_MoveX[Config.ProjectType] + Config.Camera_OffsetX[Config.ProjectType]);
-            int moveY = center.Y - (ImageAnalyseLogic.ImageHeight / 2 + Config.Camera_MoveY[Config.ProjectType] + Config.Camera_OffsetY[Config.ProjectType]);
+        public Point GetCenterPointMoved(Point center) {
+            int moveX = center.X - (ImageAnalyseLogic.ImageWidth / 2 + Config.Camera_MoveX[Config.CurrentProject] + Config.Camera_OffsetX[Config.CurrentProject]);
+            int moveY = center.Y - (ImageAnalyseLogic.ImageHeight / 2 + Config.Camera_MoveY[Config.CurrentProject] + Config.Camera_OffsetY[Config.CurrentProject]);
 
             return new Point(moveX, moveY);
         }
 
-        public double[] GetCircleNeedToChange(Point centerMoved, int lastMoveL, int lastMoveR)
-        {
+        public double[] GetCircleNeedToChange(Point centerMoved, int lastMoveL, int lastMoveR) {
             double L = 0 - (double)centerMoved.X / 14;
             double R = 0 - (double)centerMoved.Y / 70;
 
-            switch (Config.ProjectType)
-            {
+            switch (Config.CurrentProject) {
                 case ProjectType.ID3:
                     L = 0 - (double)centerMoved.X / 16;
                     R = 0 - (double)centerMoved.Y / 65;
@@ -153,21 +140,17 @@ namespace MEB_ARHUD_Calibration.Logic
             if (R < -6)
                 R = 6;
 
-            if (lastMoveL < -100 && L > 0)
-            {
+            if (lastMoveL < -100 && L > 0) {
                 L += 0.1;
             }
-            else if (lastMoveL > 100 && L < 0)
-            {
+            else if (lastMoveL > 100 && L < 0) {
                 L -= 0.1;
             }
 
-            if (lastMoveR < -100 && R > 0)
-            {
+            if (lastMoveR < -100 && R > 0) {
                 R += 0.1;
             }
-            else if (lastMoveR > 100 && R < 0)
-            {
+            else if (lastMoveR > 100 && R < 0) {
                 R -= 0.1;
             }
 
@@ -175,48 +158,39 @@ namespace MEB_ARHUD_Calibration.Logic
         }
 
 
-        private void InitAngleLimit()
-        {
+        private void InitAngleLimit() {
             Angle_L_Moved = 0;
             Angle_R_Moved = 0;
         }
 
-        private bool CheckAngleIsOverLimit()
-        {
-            if((Angle_L_Moved <= -MAX_MOVE_ANGLE || Angle_L_Moved >= MAX_MOVE_ANGLE) && (Angle_R_Moved <= -MAX_MOVE_ANGLE || Angle_R_Moved >= MAX_MOVE_ANGLE))
+        private bool CheckAngleIsOverLimit() {
+            if ((Angle_L_Moved <= -MAX_MOVE_ANGLE || Angle_L_Moved >= MAX_MOVE_ANGLE) && (Angle_R_Moved <= -MAX_MOVE_ANGLE || Angle_R_Moved >= MAX_MOVE_ANGLE))
                 return true;
             return false;
         }
 
         static int MAX_MOVE_ANGLE = Config.MaxMoveAngle;
 
-        private int[] CheckAngleCanMove(int Angle_L, int Angle_R)
-        {
+        private int[] CheckAngleCanMove(int Angle_L, int Angle_R) {
             int Angle_CanMove_L = 0;
             int Angle_CanMove_R = 0;
-            if (Angle_L + Angle_L_Moved <= MAX_MOVE_ANGLE && Angle_L + Angle_L_Moved >= -MAX_MOVE_ANGLE)
-            {
+            if (Angle_L + Angle_L_Moved <= MAX_MOVE_ANGLE && Angle_L + Angle_L_Moved >= -MAX_MOVE_ANGLE) {
                 Angle_CanMove_L = Angle_L;
             }
-            else if (Angle_L + Angle_L_Moved > MAX_MOVE_ANGLE)
-            {
+            else if (Angle_L + Angle_L_Moved > MAX_MOVE_ANGLE) {
                 Angle_CanMove_L = MAX_MOVE_ANGLE - Angle_L_Moved;
             }
-            else if (Angle_L + Angle_L_Moved < -MAX_MOVE_ANGLE)
-            {
+            else if (Angle_L + Angle_L_Moved < -MAX_MOVE_ANGLE) {
                 Angle_CanMove_L = -MAX_MOVE_ANGLE - Angle_L_Moved;
             }
 
-            if (Angle_R + Angle_R_Moved < MAX_MOVE_ANGLE && Angle_R + Angle_R_Moved > -MAX_MOVE_ANGLE)
-            {
+            if (Angle_R + Angle_R_Moved < MAX_MOVE_ANGLE && Angle_R + Angle_R_Moved > -MAX_MOVE_ANGLE) {
                 Angle_CanMove_R = Angle_R;
             }
-            else if (Angle_R + Angle_R_Moved > MAX_MOVE_ANGLE)
-            {
+            else if (Angle_R + Angle_R_Moved > MAX_MOVE_ANGLE) {
                 Angle_CanMove_R = MAX_MOVE_ANGLE - Angle_R_Moved;
             }
-            else if (Angle_R + Angle_R_Moved < -MAX_MOVE_ANGLE)
-            {
+            else if (Angle_R + Angle_R_Moved < -MAX_MOVE_ANGLE) {
                 Angle_CanMove_R = -MAX_MOVE_ANGLE - Angle_R_Moved;
             }
 
@@ -224,8 +198,7 @@ namespace MEB_ARHUD_Calibration.Logic
         }
 
 
-        private bool CheckResultCanCalc(Point p)
-        {
+        private bool CheckResultCanCalc(Point p) {
             int X = p.X - ImageAnalyseLogic.ImageWidth / 2;
             int Y = p.Y - ImageAnalyseLogic.ImageHeight / 2;
 
@@ -239,33 +212,27 @@ namespace MEB_ARHUD_Calibration.Logic
         double trans_X = 0;
         double trans_Y = 0;
 
-        public void AnalyseImageCenterWithCalcAngle(int index)
-        {
+        public void AnalyseImageCenterWithCalcAngle(int index) {
 
             Task.Factory.StartNew(() => {
                 CurrentTestIndex = index;
                 if (index == 1)
                     StartTime = DateTime.Now;
-                
+
                 trans_X = 0;
                 trans_Y = 0;
-                try
-                {
+                try {
                     AnalyseImageCenterTestStart?.Invoke();
                     mL.ShowStateMessage("开始测试");
                     Thread.Sleep(1000);
 
                     string fileName = GetImageSaveFileName(plcL.CurrentRFID);
-                    using (Bitmap bitmap = camL.GetCurrentBitmap())
-                    {
-                        try
-                        {
+                    using (Bitmap bitmap = camL.GetCurrentBitmap()) {
+                        try {
                             bitmap.Save(fileName, System.Drawing.Imaging.ImageFormat.Jpeg);
                         }
-                        catch
-                        {
-                            try
-                            {
+                        catch {
+                            try {
                                 fileName = GetImageSaveFileName("OnlyTest");
                                 bitmap.Save(fileName, System.Drawing.Imaging.ImageFormat.Jpeg);
                             }
@@ -280,9 +247,8 @@ namespace MEB_ARHUD_Calibration.Logic
                     trans_Y = centerMoved.Y * Config.PixelToMMRatio;
 
                     bool testResult = CheckResultCanCalc(center);
-                    if (testResult)
-                    {
-                        
+                    if (testResult) {
+
                         double[] rlt = GetCircleNeedToChange(centerMoved, eL.Equipment_L.LastAngle, eL.Equipment_R.LastAngle);
 
                         TestResult.AnalyseCenter = center;
@@ -298,32 +264,27 @@ namespace MEB_ARHUD_Calibration.Logic
                         mL.ShowLog("L: " + Angle_L + " R: " + Angle_R, LogType.ImageAnalyse);
                         AnalyseImageCenterTestFinished?.Invoke();
 
-                        if (centerMoved.X <= Config.CenterMovedLimit && centerMoved.X >= -Config.CenterMovedLimit && centerMoved.Y <= Config.CenterMovedLimit && centerMoved.Y >= -Config.CenterMovedLimit)
-                        {
+                        if (centerMoved.X <= Config.CenterMovedLimit && centerMoved.X >= -Config.CenterMovedLimit && centerMoved.Y <= Config.CenterMovedLimit && centerMoved.Y >= -Config.CenterMovedLimit) {
 
                             bool RotationOK = CheckRotationOK(iaL.RotationResult);
-                            if (RotationOK)
-                            {
+                            if (RotationOK) {
                                 expL.SaveToCSV(plcL.CurrentRFID, fileName, (int)TestResultType.Success, iaL.RotationResult, iaL.LOAResult, trans_X, trans_Y, Angle_L, Angle_R, center.X, center.Y);
                                 AnalyseImageCenterTestResult(true);
                                 mL.ShowLog("HUD Success", LogType.ImageAnalyse);
                                 TestSuccess();
                             }
-                            else
-                            {
+                            else {
                                 expL.SaveToCSV(plcL.CurrentRFID, fileName, (int)TestResultType.RotationError, iaL.RotationResult, iaL.LOAResult, trans_X, trans_Y, Angle_L, Angle_R, center.X, center.Y);
                                 AnalyseImageCenterTestResult(false);
                                 mL.ShowLog("HUD Fail", LogType.ImageAnalyse);
-                                TestFail( TestResultType.RotationError);
+                                TestFail(TestResultType.RotationError);
                             }
                         }
-                        else
-                        {
+                        else {
                             if (index == 1)
                                 InitAngleLimit();
 
-                            if (!CheckAngleIsOverLimit())
-                            {
+                            if (!CheckAngleIsOverLimit()) {
                                 int[] move = CheckAngleCanMove(Angle_L, Angle_R);
 
 
@@ -344,44 +305,38 @@ namespace MEB_ARHUD_Calibration.Logic
                                     plcL.SendEquipmentSecondAction();
                                 else if (index == 3)
                                     plcL.SendEquipmentThirdAction();
-                                else if (index == 4)
-                                {
+                                else if (index == 4) {
                                     mL.ShowLog("HUD Fail By Action 3rd", LogType.PLC);
-                                    
+
                                     AnalyseImageCenterTestResult(false);
                                     TestFail(TestResultType.OutOfRange);
                                 }
                             }
-                            else
-                            {
+                            else {
                                 expL.SaveToCSV(plcL.CurrentRFID, fileName, (int)TestResultType.OutOfRange, iaL.RotationResult, iaL.LOAResult, trans_X, trans_Y, Angle_L, Angle_R, center.X, center.Y);
                                 mL.ShowLog("HUD Fail By Over Range", LogType.PLC);
                                 AnalyseImageCenterTestResult(false);
                                 TestFail(TestResultType.OutOfRange);
                             }
-                            
+
                         }
                     }
-                    else
-                    {
+                    else {
                         expL.SaveToCSV(plcL.CurrentRFID, fileName, (int)TestResultType.AnalyseError, 0, 0, 0, 0, 0, 0, center.X, center.Y);
                         mL.ShowLog("HUD Fail By Result Out Range", LogType.PLC);
                         AnalyseImageCenterTestResult(false);
                         TestFail(TestResultType.AnalyseError);
                     }
                 }
-                catch (Exception ex)
-                {
+                catch (Exception ex) {
                     ExceptionUtil.SaveException(ex);
                 }
-                
+
             });
         }
 
-        private bool CheckRotationOK(double rotation)
-        {
-            switch (Config.ProjectType)
-            {
+        private bool CheckRotationOK(double rotation) {
+            switch (Config.CurrentProject) {
                 case ProjectType.Unknown:
                     return true;
                 case ProjectType.ID3:
@@ -398,25 +353,22 @@ namespace MEB_ARHUD_Calibration.Logic
             return true;
         }
 
-        private void TestSuccess()
-        {
+        private void TestSuccess() {
             DateTime stopTime = DateTime.Now;
             TimeSpan useTime = stopTime - StartTime;
 
             eL.SendAngleBack_L();
             eL.SendAngleBack_R();
             Thread.Sleep(350);
-            try
-            {
+            try {
                 fL.UploadCurrentCarFISResult(iaL.RotationResult, iaL.LOAResult, 1);
                 string currCarType = "";
                 if (fL.CurrentRFIDCar != null)
                     currCarType = ((ProjectType)fL.CheckCurrentCarType()) + "";
-                expL.SaveTestResultToCSV(currCarType, plcL.CurrentRFID, fL.CurrentRFIDCar.VIN, 1, 
+                expL.SaveTestResultToCSV(currCarType, plcL.CurrentRFID, fL.CurrentRFIDCar.VIN, 1,
                     iaL.RotationResult, iaL.LOAResult, trans_X, trans_Y, CurrentTestIndex, useTime.TotalSeconds, Angle_L_Moved, Angle_R_Moved);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 ExceptionUtil.SaveException(ex);
             }
 
@@ -427,25 +379,22 @@ namespace MEB_ARHUD_Calibration.Logic
             mL.ShowStateMessage("测试成功");
         }
 
-        private void TestFail(TestResultType resultType)
-        {
+        private void TestFail(TestResultType resultType) {
             DateTime stopTime = DateTime.Now;
             TimeSpan useTime = stopTime - StartTime;
 
             eL.SendAngleBack_L();
             eL.SendAngleBack_R();
             Thread.Sleep(350);
-            try
-            {
+            try {
                 fL.UploadCurrentCarFISResult(iaL.RotationResult, iaL.LOAResult, 0);
                 string currCarType = "";
                 if (fL.CurrentRFIDCar != null)
                     currCarType = ((ProjectType)fL.CheckCurrentCarType()) + "";
-                expL.SaveTestResultToCSV(currCarType, plcL.CurrentRFID, fL.CurrentRFIDCar.VIN, (int)resultType, 
+                expL.SaveTestResultToCSV(currCarType, plcL.CurrentRFID, fL.CurrentRFIDCar.VIN, (int)resultType,
                     iaL.RotationResult, iaL.LOAResult, trans_X, trans_Y, CurrentTestIndex, useTime.TotalSeconds, Angle_L_Moved, Angle_R_Moved);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 ExceptionUtil.SaveException(ex);
             }
             plcL.SendTestResult(false);
@@ -455,8 +404,7 @@ namespace MEB_ARHUD_Calibration.Logic
             mL.ShowStateMessage("测试失败");
         }
 
-        private string GetImageSaveFileName(string name)
-        {
+        private string GetImageSaveFileName(string name) {
             return ExportUtil.GetImageSaveFileName(name);
         }
     }

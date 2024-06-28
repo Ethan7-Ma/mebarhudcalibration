@@ -1,23 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Net.Sockets;
 using System.Net;
+using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 
-namespace MEB_ARHUD_Calibration.Common
-{
-    public class SocketServer
-    {
-        public SocketServer()
-        {
+namespace MEB_ARHUD_Calibration.Common {
+    public class SocketServer {
+        public SocketServer() {
             StartListenSocket();
         }
 
-        public SocketServer(string ip, int port)
-        {
+        public SocketServer(string ip, int port) {
             this.ip = ip;
             this.port = port;
             StartListenSocket();
@@ -39,28 +33,23 @@ namespace MEB_ARHUD_Calibration.Common
 
         public bool RobotConnected => PLCConnectFlag > 0;
 
-        public TimeSpan TimeSpan
-        {
+        public TimeSpan TimeSpan {
             get { return timeSpan; }
             set { timeSpan = value; }
         }
 
-        public string IP
-        {
+        public string IP {
             get { return ip; }
             set { ip = value; }
         }
 
-        public int Port
-        {
+        public int Port {
             get { return port; }
             set { port = value; }
         }
 
-        private void StartListenSocket()
-        {
-            try
-            {
+        private void StartListenSocket() {
+            try {
                 socketWatch = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 IPAddress address = IPAddress.Parse(ip);
                 IPEndPoint point = new IPEndPoint(address, port);
@@ -72,33 +61,26 @@ namespace MEB_ARHUD_Calibration.Common
                 threadwatch.Start();
                 Console.WriteLine("开启监听 " + address + ":" + port);
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Console.WriteLine(e.Message);
             }
         }
 
-        private void CheckConnectStateThread()
-        {
-            while (true)
-            {
+        private void CheckConnectStateThread() {
+            while (true) {
                 Thread.Sleep(1000);
                 PLCConnectFlag--;
             }
         }
 
-        private void WatchConnecting()
-        {
+        private void WatchConnecting() {
             Socket connection = null;
 
-            while (true)
-            {
-                try
-                {
+            while (true) {
+                try {
                     connection = socketWatch.Accept();
                 }
-                catch (Exception ex)
-                {
+                catch (Exception ex) {
                     Console.WriteLine(ex.Message);
                     break;
                 }
@@ -125,19 +107,15 @@ namespace MEB_ARHUD_Calibration.Common
 
         List<Socket> clients = new List<Socket>();
 
-        private void CheckConnect(object socketclientpara)
-        {
+        private void CheckConnect(object socketclientpara) {
             Socket socketServer = socketclientpara as Socket;
 
-            while (true)
-            {
+            while (true) {
                 if (socketServer == null || !socketServer.Connected)
                     break;
-                try
-                {
+                try {
                     PLCConnectFlag = 25;
-                    if (socketServer.Poll(-1, SelectMode.SelectRead))
-                    {
+                    if (socketServer.Poll(-1, SelectMode.SelectRead)) {
                         PLCConnectFlag = 0;
                         Console.WriteLine("客户端" + socketServer.RemoteEndPoint + "已经中断连接\r\n");
                         clients.Remove(socketServer);
@@ -145,33 +123,27 @@ namespace MEB_ARHUD_Calibration.Common
                         break;
                     }
                 }
-                catch (Exception ex)
-                {
-                    try
-                    {
+                catch (Exception ex) {
+                    try {
                         PLCConnectFlag = 0;
                         Console.WriteLine("客户端" + socketServer.RemoteEndPoint + "已经中断连接" + "\r\n" + ex.Message + "\r\n" + ex.StackTrace + "\r\n");
                         clients.Remove(socketServer);
                         socketServer.Close();
                     }
-                    catch
-                    {
+                    catch {
                     }
                     break;
                 }
             }
         }
 
-        private void Recv(object socketclientpara)
-        {
+        private void Recv(object socketclientpara) {
             Socket socketServer = socketclientpara as Socket;
 
-            while (true)
-            {
+            while (true) {
                 if (socketServer == null || !socketServer.Connected)
                     break;
-                try
-                {
+                try {
                     byte[] arrServerRecMsg = new byte[1024 * 1024];
                     int length = socketServer.Receive(arrServerRecMsg);
                     string strSRecMsg = Encoding.UTF8.GetString(arrServerRecMsg, 0, length);
@@ -188,99 +160,77 @@ namespace MEB_ARHUD_Calibration.Common
 
                     PLCConnectFlag = 25;
                 }
-                catch (Exception ex)
-                {
-                    try
-                    {
+                catch (Exception ex) {
+                    try {
                         Console.WriteLine("客户端" + socketServer.RemoteEndPoint + "已经中断连接" + "\r\n" + ex.Message + "\r\n" + ex.StackTrace + "\r\n");
                         clients.Remove(socketServer);
                         socketServer.Close();
                     }
-                    catch
-                    {
+                    catch {
                     }
                     break;
                 }
             }
         }
 
-        public void SendDatas(byte[] datas)
-        {
-            try
-            {
+        public void SendDatas(byte[] datas) {
+            try {
                 List<Socket> ErrorSockets = new List<Socket>();
 
-                foreach (Socket client in clients)
-                {
-                    try
-                    {
-                        if (client != null && client.Connected)
-                        {
+                foreach (Socket client in clients) {
+                    try {
+                        if (client != null && client.Connected) {
                             int rlt = client.SendTo(datas, client.RemoteEndPoint);
                         }
                     }
-                    catch (Exception e)
-                    {
+                    catch (Exception e) {
                         ErrorSockets.Add(client);
                         Console.WriteLine("SendMessageError " + e.Message);
                     }
                 }
 
-                if (ErrorSockets.Count > 0)
-                {
-                    foreach (Socket errorSocket in ErrorSockets)
-                    {
+                if (ErrorSockets.Count > 0) {
+                    foreach (Socket errorSocket in ErrorSockets) {
                         clients.Remove(errorSocket);
                         errorSocket.Close();
                     }
                 }
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Console.WriteLine(e.Message);
             }
         }
 
-        public void SendMessage(string message)
-        {
-            try
-            {
+        public void SendMessage(string message) {
+            try {
                 List<Socket> ErrorSockets = new List<Socket>();
 
-                foreach (Socket client in clients)
-                {
-                    try
-                    {
-                        if (client != null && client.Connected)
-                        {
+                foreach (Socket client in clients) {
+                    try {
+                        if (client != null && client.Connected) {
                             int rlt = client.SendTo(Encoding.UTF8.GetBytes(message), client.RemoteEndPoint);
                             Console.WriteLine(rlt + " Server -> " + client.RemoteEndPoint + ": " + message);
                         }
                     }
-                    catch (Exception e)
-                    {
+                    catch (Exception e) {
                         ErrorSockets.Add(client);
                         Console.WriteLine("SendMessageError " + e.Message);
                     }
                 }
 
-                if (ErrorSockets.Count > 0)
-                {
-                    foreach (Socket errorSocket in ErrorSockets)
-                    {
+                if (ErrorSockets.Count > 0) {
+                    foreach (Socket errorSocket in ErrorSockets) {
                         clients.Remove(errorSocket);
                         errorSocket.Close();
                     }
                 }
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Console.WriteLine(e.Message);
             }
         }
 
-        private DateTime GetCurrentTime()
-        {
+        private DateTime GetCurrentTime() {
             DateTime currentTime = new DateTime();
             currentTime = DateTime.Now;
             return currentTime;
