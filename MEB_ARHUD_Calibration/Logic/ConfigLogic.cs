@@ -24,7 +24,6 @@ namespace MEB_ARHUD_Calibration.Logic
 
         }
 
-        public List<string> List_CameraSerial = new List<string>();
         public List<string> List_CameraConfigFileName = new List<string>();
 
         public void SaveNextCarInfo(ProjectType type, string vin)
@@ -32,20 +31,20 @@ namespace MEB_ARHUD_Calibration.Logic
             XMLUtil.UpdateNextCarInfoToSystemConfigXml(@"Config\SysConfig.xml", type, vin);
         }
 
-        public void InitSystemInfos()
+        public void LoadSystemConfig()
         {
             XMLUtil.InitConfigsFromSystemConfigXml(@"Config\SysConfig.xml");
         }
 
-        public void InitCameraDeviceInfo()
+        public void LoadCameraConfig()
         {
             List_CameraConfigFileName.Add(@"Config\ID3\icImagingControlDeviceState.txt");
             List_CameraConfigFileName.Add(@"Config\ID4X\icImagingControlDeviceState.txt");
             List_CameraConfigFileName.Add(@"Config\ID6X\icImagingControlDeviceState.txt");
 
-            List_CameraSerial.Add("24124037");
-            List_CameraSerial.Add("24124166");
-            List_CameraSerial.Add("24124169");
+            List_CameraConfigFileName.Add(@"Config\ID3N\icImagingControlDeviceState.txt");
+            List_CameraConfigFileName.Add(@"Config\ID4XN\icImagingControlDeviceState.txt");
+            List_CameraConfigFileName.Add(@"Config\ID6XN\icImagingControlDeviceState.txt");
 
             int[] camera_Center_ID3 = XMLUtil.GetCameraCenterFromProjectConfigXml(@"Config\ID3\config.xml");
             Config.Camera_MoveX.Add(ProjectType.ID3, camera_Center_ID3[0]);
@@ -70,6 +69,30 @@ namespace MEB_ARHUD_Calibration.Logic
             Config.Camera_MoveY.Add(ProjectType.AUDI, camera_Center_Audi[1]);
             Config.Camera_OffsetX.Add(ProjectType.AUDI, camera_Center_Audi[2]);
             Config.Camera_OffsetY.Add(ProjectType.AUDI, camera_Center_Audi[3]);
+
+            int[] camera_Center_ID3N = XMLUtil.GetCameraCenterFromProjectConfigXml(@"Config\ID3N\config.xml");
+            Config.Camera_MoveX.Add(ProjectType.ID3N, camera_Center_ID3N[0]);
+            Config.Camera_MoveY.Add(ProjectType.ID3N, camera_Center_ID3N[1]);
+            Config.Camera_OffsetX.Add(ProjectType.ID3N, camera_Center_ID3N[2]);
+            Config.Camera_OffsetY.Add(ProjectType.ID3N, camera_Center_ID3N[3]);
+
+            int[] camera_Center_ID4N = XMLUtil.GetCameraCenterFromProjectConfigXml(@"Config\ID4XN\config.xml");
+            Config.Camera_MoveX.Add(ProjectType.ID4XN, camera_Center_ID4N[0]);
+            Config.Camera_MoveY.Add(ProjectType.ID4XN, camera_Center_ID4N[1]);
+            Config.Camera_OffsetX.Add(ProjectType.ID4XN, camera_Center_ID4N[2]);
+            Config.Camera_OffsetY.Add(ProjectType.ID4XN, camera_Center_ID4N[3]);
+
+            int[] camera_Center_ID6N = XMLUtil.GetCameraCenterFromProjectConfigXml(@"Config\ID6XN\config.xml");
+            Config.Camera_MoveX.Add(ProjectType.ID6XN, camera_Center_ID6N[0]);
+            Config.Camera_MoveY.Add(ProjectType.ID6XN, camera_Center_ID6N[1]);
+            Config.Camera_OffsetX.Add(ProjectType.ID6XN, camera_Center_ID6N[2]);
+            Config.Camera_OffsetY.Add(ProjectType.ID6XN, camera_Center_ID6N[3]);
+
+            int[] camera_Center_AudiN = XMLUtil.GetCameraCenterFromProjectConfigXml(@"Config\AUDIN\config.xml");
+            Config.Camera_MoveX.Add(ProjectType.AUDIN, camera_Center_AudiN[0]);
+            Config.Camera_MoveY.Add(ProjectType.AUDIN, camera_Center_AudiN[1]);
+            Config.Camera_OffsetX.Add(ProjectType.AUDIN, camera_Center_AudiN[2]);
+            Config.Camera_OffsetY.Add(ProjectType.AUDIN, camera_Center_AudiN[3]);
         }
 
         public void SaveID3CameraCalibration(int X, int Y)
@@ -100,33 +123,34 @@ namespace MEB_ARHUD_Calibration.Logic
             XMLUtil.SetCameraCenterFromProjectConfigXml(@"Config\AUDI\config.xml", X, Y);
         }
 
-        public void SaveID3CameraOffset(int X, int Y)
+        public void SaveID3NCameraCalibration(int X, int Y)
         {
-            Config.Camera_OffsetX[ProjectType.ID3] = X;
-            Config.Camera_OffsetY[ProjectType.ID3] = Y;
-            XMLUtil.SetCameraOffsetFromProjectConfigXml(@"Config\ID3\config.xml", X, Y);
+            Config.Camera_MoveX[ProjectType.ID3N] = X;
+            Config.Camera_MoveY[ProjectType.ID3N] = Y;
+            XMLUtil.SetCameraCenterFromProjectConfigXml(@"Config\ID3N\config.xml", X, Y);
         }
 
-        public void SaveID4XCameraOffset(int X, int Y)
+        public void SaveID4XNCameraCalibration(int X, int Y)
         {
-            Config.Camera_OffsetX[ProjectType.ID4X] = X;
-            Config.Camera_OffsetY[ProjectType.ID4X] = Y;
-            XMLUtil.SetCameraOffsetFromProjectConfigXml(@"Config\ID4X\config.xml", X, Y);
+            Config.Camera_MoveX[ProjectType.ID4XN] = X;
+            Config.Camera_MoveY[ProjectType.ID4XN] = Y;
+            XMLUtil.SetCameraCenterFromProjectConfigXml(@"Config\ID4XN\config.xml", X, Y);
         }
 
-        public void SaveID6XCameraOffset(int X, int Y)
+        public void SaveID6XNCameraCalibration(int X, int Y)
         {
-            Config.Camera_OffsetX[ProjectType.ID6X] = X;
-            Config.Camera_OffsetY[ProjectType.ID6X] = Y;
-            XMLUtil.SetCameraOffsetFromProjectConfigXml(@"Config\ID6X\config.xml", X, Y);
+            Config.Camera_MoveX[ProjectType.ID6XN] = X;
+            Config.Camera_MoveY[ProjectType.ID6XN] = Y;
+            XMLUtil.SetCameraCenterFromProjectConfigXml(@"Config\ID6XN\config.xml", X, Y);
         }
 
-        public void SaveAUDICameraOffset(int X, int Y)
+        public void SaveAUDINCameraCalibration(int X, int Y)
         {
-            Config.Camera_OffsetX[ProjectType.AUDI] = X;
-            Config.Camera_OffsetY[ProjectType.AUDI] = Y;
-            XMLUtil.SetCameraOffsetFromProjectConfigXml(@"Config\AUDI\config.xml", X, Y);
+            Config.Camera_MoveX[ProjectType.AUDIN] = X;
+            Config.Camera_MoveY[ProjectType.AUDIN] = Y;
+            XMLUtil.SetCameraCenterFromProjectConfigXml(@"Config\AUDIN\config.xml", X, Y);
         }
+
 
         public void SaveID3NeedTest(bool NeedTest)
         {
@@ -146,6 +170,26 @@ namespace MEB_ARHUD_Calibration.Logic
         public void SaveAUDINeedTest(bool NeedTest)
         {
             XMLUtil.UpdateAttrToXml(@"Config\SysConfig.xml", "NeedTest", "AUDI", NeedTest + "");
+        }
+
+        public void SaveID3NNeedTest(bool NeedTest)
+        {
+            XMLUtil.UpdateAttrToXml(@"Config\SysConfig.xml", "NeedTest", "ID3N", NeedTest + "");
+        }
+
+        public void SaveID4XNNeedTest(bool NeedTest)
+        {
+            XMLUtil.UpdateAttrToXml(@"Config\SysConfig.xml", "NeedTest", "ID4XN", NeedTest + "");
+        }
+
+        public void SaveID6XNNeedTest(bool NeedTest)
+        {
+            XMLUtil.UpdateAttrToXml(@"Config\SysConfig.xml", "NeedTest", "ID6XN", NeedTest + "");
+        }
+
+        public void SaveAUDINNeedTest(bool NeedTest)
+        {
+            XMLUtil.UpdateAttrToXml(@"Config\SysConfig.xml", "NeedTest", "AUDIN", NeedTest + "");
         }
     }
 }

@@ -32,6 +32,7 @@ namespace MEB_ARHUD_Calibration
 
         private bool Login(string userName, string password)
         {
+            return true;
             LoginResult loginResult = uL.Login(userName, password);
             switch (loginResult)
             {

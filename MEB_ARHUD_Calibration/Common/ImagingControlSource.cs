@@ -9,6 +9,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using TIS;
 using TIS.Imaging;
+using System.IO;
 
 namespace MEB_ARHUD_Calibration.Common
 {
@@ -18,7 +19,6 @@ namespace MEB_ARHUD_Calibration.Common
         private string deviceStateString = "";
         private bool isLiving = false;
         private bool connected = false;
-        private string serialNumber = "";
 
         private bool outLivingImage = false;
 
@@ -26,9 +26,6 @@ namespace MEB_ARHUD_Calibration.Common
 
         private int LivingImageFlag = 10;
 
-        public bool OutLivingImage => outLivingImage;
-
-        public bool Living { get { return isLiving; } }
         public bool Connected { get { return LivingImageFlag > 15; } }
 
         private event CameraNewFrameDelegateFunction NewFrameEvent = null;
@@ -46,10 +43,9 @@ namespace MEB_ARHUD_Calibration.Common
             remove { }
         }
 
-        public ImagingControlSource(string serial, string file)
+        public ImagingControlSource(string file)
         {
-            serialNumber = serial;
-            deviceStateString = TextUtil.LoadStringFromFile(file);
+            deviceStateString = File.ReadAllText(file);
             InitImagingControl();
 
             Thread t_CheckConnect = new Thread(CheckLivingImageThread);
@@ -59,22 +55,11 @@ namespace MEB_ARHUD_Calibration.Common
 
         public void InitImagingControl()
         {
-            try
-            {
-                icImagingControl.DeviceListChangedExecutionMode = TIS.Imaging.EventExecutionMode.Invoke;
-                icImagingControl.DeviceLostExecutionMode = TIS.Imaging.EventExecutionMode.AsyncInvoke;
-                icImagingControl.ImageAvailableExecutionMode = TIS.Imaging.EventExecutionMode.MultiThreaded;
-                icImagingControl.LiveDisplay = true;
-                icImagingControl.LiveCaptureContinuous = true;
-
-                icImagingControl.ImageAvailable += new EventHandler<ICImagingControl.ImageAvailableEventArgs>(IcImagingControlImageAvailable);
-                icImagingControl.DeviceLost += new EventHandler<ICImagingControl.DeviceLostEventArgs>(IcImagingControlDeviceLost);
-                icImagingControl.DeviceListChanged += new EventHandler(IcImagingControlDeviceListChanged);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
+            icImagingControl.DeviceListChangedExecutionMode = EventExecutionMode.Invoke;
+            icImagingControl.DeviceLostExecutionMode = EventExecutionMode.AsyncInvoke;
+            icImagingControl.ImageAvailableExecutionMode = EventExecutionMode.MultiThreaded;
+            icImagingControl.LiveDisplay = true;
+            icImagingControl.ImageAvailable += IcImagingControlImageAvailable;
         }
 
         private void CheckLivingImageThread()
@@ -102,102 +87,16 @@ namespace MEB_ARHUD_Calibration.Common
             }
         }
 
-        public void ChangeImagingControlDeviceState(string serial, string file)
-        {
-            try
-            {
-                Console.WriteLine("Enter Change Imaging Control Device");
-                if (Living)
-                    LiveStop();
-                Console.WriteLine("End Live Stop ");
-
-                serialNumber = serial;
-                deviceStateString = TextUtil.LoadStringFromFile(file);
-                Console.WriteLine("Before Set Device State");
-                icImagingControl.DeviceState = deviceStateString;
-                Console.WriteLine("End Set Device State");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                Console.WriteLine(e.StackTrace);
-            }
-        }
 
         public bool InitImagingControlDeviceState()
         {
-            try
-            {
-                try
-                {
-                    icImagingControl.LiveStop();
-                }
-                catch { }
-                icImagingControl.DeviceState = deviceStateString;
-                connected = true;
-                return true;
-            }
-            catch (Exception e)
-            {
-                ExceptionUtil.SaveException(e);
-            }
-            return false;
+            icImagingControl.LiveStop();
+            icImagingControl.DeviceState = deviceStateString;
+            connected = true;
+            return true;
         }
 
-
-
-        public bool GetImagingControlState()
-        {
-            if (CanGetImagingControlDeviceVersion())
-                return true;
-            else
-            {
-                InitImagingControl();
-                if (CanGetImagingControlDeviceVersion())
-                    return true;
-            }
-            return false;
-        }
-
-        private bool CanGetImagingControlDeviceVersion()
-        {
-            try
-            {
-                ulong version = icImagingControl.DeviceCurrent.DeviceVersion;
-                return true;
-            }
-            catch (Exception e)
-            {
-                ExceptionUtil.SaveException(e);
-                return false;
-            }
-        }
-
-        public DialogResult ShowDeviceSettingsDialog()
-        {
-            try
-            {
-                return icImagingControl.ShowDeviceSettingsDialog();
-            }
-            catch (Exception e)
-            {
-                ExceptionUtil.SaveException(e);
-                return DialogResult.Cancel;
-            }
-        }
-
-        public void ShowPropertyDialog()
-        {
-            try
-            {
-                icImagingControl.ShowPropertyDialog();
-            }
-            catch (Exception e)
-            {
-                ExceptionUtil.SaveException(e);
-            }
-        }
-
+        
         public void LiveStart()
         {
             if (isLiving)
@@ -205,6 +104,7 @@ namespace MEB_ARHUD_Calibration.Common
 
             try
             {
+                Console.WriteLine(Thread.CurrentThread.ManagedThreadId);
                 icImagingControl.LiveStart();
                 isLiving = true;
             }
@@ -241,17 +141,6 @@ namespace MEB_ARHUD_Calibration.Common
             outLivingImage = false;
         }
 
-        public Bitmap GetBitmap()
-        {
-            if (!isLiving)
-                return null;
-            Bitmap bitmap = icImagingControl.ImageActiveBuffer.Bitmap;
-            BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadWrite, bitmap.PixelFormat);
-            Bitmap bmp = new Bitmap(bitmap.Width, bitmap.Height, bmpData.Stride, bitmap.PixelFormat, bmpData.Scan0);
-            bitmap.UnlockBits(bmpData);
-
-            return bmp;
-        }
 
         private void IcImagingControlImageAvailable(object sender, ICImagingControl.ImageAvailableEventArgs e)
         {
@@ -284,16 +173,6 @@ namespace MEB_ARHUD_Calibration.Common
             }
         }
 
-        private void IcImagingControlDeviceLost(object sender, ICImagingControl.DeviceLostEventArgs e)
-        {
-            
-        }
-
-        private void IcImagingControlDeviceListChanged(object sender, EventArgs e)
-        {
-            
-        }
-
         public Bitmap DeepCopyBitmap(Bitmap bitmap)
         {
             try
@@ -305,30 +184,6 @@ namespace MEB_ARHUD_Calibration.Common
             {
                 ExceptionUtil.SaveException(ex);
                 return null;
-            }
-        }
-
-        public void DisposeICControl()
-        {
-            try
-            {
-                icImagingControl.Dispose();
-            }
-            catch (Exception e)
-            {
-                ExceptionUtil.SaveException(e);
-            }
-        }
-
-        public void SaveConfigs(string fileName)
-        {
-            try
-            {
-                icImagingControl.SaveDeviceStateToFile(fileName);
-            }
-            catch (Exception e)
-            {
-                ExceptionUtil.SaveException(e);
             }
         }
     }

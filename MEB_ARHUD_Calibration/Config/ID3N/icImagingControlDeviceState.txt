@@ -1,12 +1,30 @@
-<device_state libver="3.4" filemajor="1" fileminor="0">
-    <device name="DFK 33GX226" base_name="DFK 33GX226" unique_name="DFK 33GX226 24124037">
-        <videoformat>RGB32 (4000x3000)</videoformat>
-        <fps>5.</fps>
+<device_state libver="3.5" filemajor="1" fileminor="0">
+    <device name="DFK 33GX226 4" base_name="DFK 33GX226" unique_name="DFK 33GX226 3424437">
+        <videoformat>RGB64 (4000x3000)</videoformat>
+        <fps>6.00000</fps>
         <flipv>0</flipv>
         <vcdpropertyitems>
+            <item guid="{8E972004-3B94-4AA4-A899-65F6A1432713}" name="Startup Behavior" />
+            <item guid="{186A4F05-5E01-4496-B9E5-2BA6F134C4BB}" name="Stream packet resend">
+                <element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Enable">
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="1" />
+                </element>
+                <element guid="{5F991652-A933-4A40-8693-A0F12C8FAE11}" name="Resend retry wait time factor">
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="0.700000" />
+                </element>
+                <element guid="{734A567F-D377-4981-BB34-7787F3A1C395}" name="Auto adjust &apos;Time per frame&apos; property">
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="1" />
+                </element>
+                <element guid="{2A8F3097-D0B3-4A57-B890-4811E87A0CAB}" name="Resend retry count">
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="3" />
+                </element>
+                <element guid="{DB2ECAEA-5410-4310-98B6-1091548F7C4F}" name="Resend first wait time factor">
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="0.700000" />
+                </element>
+            </item>
             <item guid="{284C0E06-010B-45BF-8291-09D90A459B28}" name="Brightness">
                 <element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="0" />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="50" />
                 </element>
             </item>
             <item guid="{284C0E07-010B-45BF-8291-09D90A459B28}" name="Contrast">
@@ -21,7 +39,7 @@
             </item>
             <item guid="{284C0E09-010B-45BF-8291-09D90A459B28}" name="Saturation">
                 <element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="100." />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="100.000000" />
                 </element>
             </item>
             <item guid="{284C0E0A-010B-45BF-8291-09D90A459B28}" name="Sharpness">
@@ -31,12 +49,21 @@
             </item>
             <item guid="{284C0E0B-010B-45BF-8291-09D90A459B28}" name="Gamma">
                 <element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="1." />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="1.000000" />
                 </element>
             </item>
             <item guid="{284C0E0D-010B-45BF-8291-09D90A459B28}" name="WhiteBalance">
                 <element guid="{B57D3001-0AC6-4819-A609-272A33140ACA}" name="Auto">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="1" />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" />
+                </element>
+                <element guid="{8407E480-175A-498C-8171-08BD987CC1AC}" name="White Balance Green">
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="64" />
+                </element>
+                <element guid="{6519038A-1AD8-4E91-9021-66D64090CC85}" name="White Balance Blue">
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="64" />
+                </element>
+                <element guid="{6519038B-1AD8-4E91-9021-66D64090CC85}" name="White Balance Red">
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="64" />
                 </element>
                 <element guid="{AB98F78D-18A6-4EB2-A556-C11010EC9DF7}" name="WhiteBalance Mode">
                     <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E06}" value="0" />
@@ -47,7 +74,15 @@
                     <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" />
                 </element>
                 <element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="10" />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="0.000000" />
+                </element>
+            </item>
+            <item guid="{AE94A428-70EC-46FA-94EF-E49797250B8A}" name="PixelFix">
+                <element guid="{A2EEB7B5-B95F-458B-A2C6-6156B271EB57}" name="Enable">
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="1" />
+                </element>
+                <element guid="{A2EEB7B6-B95F-458B-A2C6-6156B271EB57}" name="Debug Mode">
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" />
                 </element>
             </item>
             <item guid="{90D5702E-E43B-4366-AAEB-7A7A10B448B4}" name="Exposure">
@@ -55,7 +90,7 @@
                     <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" />
                 </element>
                 <element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="0.02" />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="0.284949" />
                 </element>
                 <element guid="{65190390-1AD8-4E91-9021-66D64090CC85}" name="Auto">
                     <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="1" />
@@ -84,6 +119,17 @@
                     <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="0" />
                 </element>
             </item>
+            <item guid="{4F95A06D-9C15-407B-96AB-CF3FED047BA4}" name="Binning factor">
+                <element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Value">
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E06}" value="1" />
+                </element>
+            </item>
+            <item guid="{B8891785-604F-48BD-86CA-75428A44F5C8}" name="PTP">
+                <element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Enable">
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="1" />
+                </element>
+            </item>
+            <item guid="{FED8FE95-48F5-4625-96B3-9EF080DF5AFF}" name="Timestamp" />
             <item guid="{546541AD-C815-4D82-AFA9-9D59AF9F399E}" name="Highlight Reduction">
                 <element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Enable">
                     <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" />
@@ -92,6 +138,17 @@
             <item guid="{3D505AC4-1A28-428B-83E5-85AA8EB441C1}" name="Tone Mapping">
                 <element guid="{B57D3000-0AC6-4819-A609-272A33140ACA}" name="Enable">
                     <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="0" />
+                </element>
+            </item>
+            <item guid="{57DA7ED0-9783-43DC-BD03-53F724B5F8A6}" name="ActionScheduler">
+                <element guid="{D469C116-AF0D-4C2B-AA82-22DAF186703F}" name="Interval">
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="0" />
+                </element>
+                <element guid="{E4125278-50F8-4780-BD70-65374D4DEF23}" name="TimeSeconds">
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="0" />
+                </element>
+                <element guid="{2F707FCF-D12D-483E-8103-28E2E78827A5}" name="TimeNanoseconds">
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E03}" value="0" />
                 </element>
             </item>
             <item guid="{2CED6FD6-AB4D-4C74-904C-D682E53B9CC5}" name="Partial scan">
@@ -109,31 +166,31 @@
                     <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="1" />
                 </element>
                 <element guid="{57480AA0-2883-4C7D-A066-357D07C4527D}" name="RR">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="0.9900000095367431640625" />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="1.000000" />
                 </element>
                 <element guid="{57480AA1-2883-4C7D-A066-357D07C4527D}" name="RG">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="0.119999997317790985107421875" />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="1.000000" />
                 </element>
                 <element guid="{57480AA2-2883-4C7D-A066-357D07C4527D}" name="RB">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="-0.10999999940395355224609375" />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="1.000000" />
                 </element>
                 <element guid="{57480AA3-2883-4C7D-A066-357D07C4527D}" name="GR">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="-0.1599999964237213134765625" />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="1.000000" />
                 </element>
                 <element guid="{57480AA4-2883-4C7D-A066-357D07C4527D}" name="GG">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="1.2200000286102294921875" />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="1.000000" />
                 </element>
                 <element guid="{57480AA5-2883-4C7D-A066-357D07C4527D}" name="GB">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="-5.99999986588954925537109375e-02" />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="1.000000" />
                 </element>
                 <element guid="{57480AA6-2883-4C7D-A066-357D07C4527D}" name="BR">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="0." />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="1.000000" />
                 </element>
                 <element guid="{57480AA7-2883-4C7D-A066-357D07C4527D}" name="BG">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="-1.99999995529651641845703125e-02" />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="1.000000" />
                 </element>
                 <element guid="{57480AA8-2883-4C7D-A066-357D07C4527D}" name="BB">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="1.019999980926513671875" />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E08}" value="1.000000" />
                 </element>
             </item>
             <item guid="{124922E5-81C7-4587-867D-7BA16AF79079}" name="Auto Functions ROI">
@@ -141,9 +198,10 @@
                     <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E04}" value="1" />
                 </element>
                 <element guid="{93D840ED-B7B8-45FE-91E2-18E68C41AFC3}" name="Preset">
-                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E06}" value="2" />
+                    <itf guid="{99B44940-BFE1-4083-ADA1-BE703F4B8E06}" value="0" />
                 </element>
             </item>
+            <item guid="{B7D87AFA-4044-4D05-9832-D848B53B749A}" name="Device Temperature" />
         </vcdpropertyitems>
     </device>
 </device_state>

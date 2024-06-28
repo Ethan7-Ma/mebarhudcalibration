@@ -1,5 +1,5 @@
-<device_state libver="3.4" filemajor="1" fileminor="0">
-    <device name="DFK 33GX226" base_name="DFK 33GX226" unique_name="DFK 33GX226 27124169">
+<device_state libver="3.5" filemajor="1" fileminor="0">
+    <device name="DFK 33GX226 3" base_name="DFK 33GX226" unique_name="DFK 33GX226 27124169">
         <videoformat>RGB32 (4000x3000)</videoformat>
         <fps>5.</fps>
         <flipv>0</flipv>

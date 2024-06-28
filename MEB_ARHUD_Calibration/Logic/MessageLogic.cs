@@ -25,22 +25,10 @@ namespace MEB_ARHUD_Calibration.Logic
         public bool ShowEquipmentLog = false;
         public bool ShowFISLog = false;
 
-
-        private static MessageLogic instance = null;
-
         public event Action<string> ShowStateMessageEvent = null;
 
-        public static MessageLogic GetInstance()
-        {
-            if (instance == null)
-                instance = new MessageLogic();
-            return instance;
-        }
-
-        private MessageLogic()
-        {
-
-        }
+        private static MessageLogic? instance = null;
+        public static MessageLogic GetInstance() => instance ??= new MessageLogic();
 
         string lastStateMsg = "";
 
@@ -94,9 +82,5 @@ namespace MEB_ARHUD_Calibration.Logic
             Console.WriteLine(DateTime.Now.ToString("HH:mm:ss:fff ") + msg);
         }
 
-        public void PrintStates()
-        {
-            Console.WriteLine("PLC " + ShowPLCLog + " Equipment " + ShowEquipmentLog);
-        }
     }
 }

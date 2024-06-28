@@ -1,9 +1,9 @@
-﻿using System;
+﻿using MEB_ARHUD_Calibration.Data;
+using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Xml;
-using MEB_ARHUD_Calibration.Data;
 
 namespace MEB_ARHUD_Calibration.Common
 {
@@ -86,26 +86,20 @@ namespace MEB_ARHUD_Calibration.Common
         public static int[] GetCameraCenterFromProjectConfigXml(string fileName)
         {
             XmlDocument xmldoc = new XmlDocument();
-            try
-            {
-                xmldoc.Load(fileName);
 
-                XmlElement root = xmldoc.DocumentElement;
+            xmldoc.Load(fileName);
 
-                int centerX = 0;
-                int centerY = 0;
-                int offsetX = 0;
-                int offsetY = 0;
-                int.TryParse(GetAttr(root, "Center", "CC_X"), out centerX);
-                int.TryParse(GetAttr(root, "Center", "CC_Y"), out centerY);
-                int.TryParse(GetAttr(root, "Offset", "X"), out offsetX);
-                int.TryParse(GetAttr(root, "Offset", "Y"), out offsetY);
-                return new int[] { centerX, centerY, offsetX, offsetY };
-            }
-            catch (Exception)
-            {
-                return new int[] { 0, 0 };
-            }
+            XmlElement root = xmldoc.DocumentElement;
+
+            int centerX = 0;
+            int centerY = 0;
+            int offsetX = 0;
+            int offsetY = 0;
+            int.TryParse(GetAttr(root, "Center", "CC_X"), out centerX);
+            int.TryParse(GetAttr(root, "Center", "CC_Y"), out centerY);
+            int.TryParse(GetAttr(root, "Offset", "X"), out offsetX);
+            int.TryParse(GetAttr(root, "Offset", "Y"), out offsetY);
+            return new int[] { centerX, centerY, offsetX, offsetY };
         }
 
         public static void SetCameraCenterFromProjectConfigXml(string fileName, int X, int Y)
@@ -131,31 +125,6 @@ namespace MEB_ARHUD_Calibration.Common
             {
             }
         }
-
-        public static void SetCameraOffsetFromProjectConfigXml(string fileName, int X, int Y)
-        {
-            XmlDocument xmldoc = new XmlDocument();
-            try
-            {
-                xmldoc.Load(fileName);
-
-                XmlElement root = xmldoc.DocumentElement;
-
-                XmlNodeList nodes = root.GetElementsByTagName("Offset");
-                foreach (XmlNode node in nodes)
-                {
-                    XmlElement oneEle = node as XmlElement;
-                    oneEle.SetAttribute("X", X + "");
-                    oneEle.SetAttribute("Y", Y + "");
-                    xmldoc.Save(fileName);
-                    return;
-                }
-            }
-            catch (Exception)
-            {
-            }
-        }
-
 
 
         public static void UpdateNextCarInfoToSystemConfigXml(string fileName, ProjectType type, string vin)
@@ -185,108 +154,34 @@ namespace MEB_ARHUD_Calibration.Common
             }
         }
 
-        public static void UpdateTestItem(string fileName, string name, string item, string value)
-        {
-            XmlDocument xmldoc = new XmlDocument();
-            try
-            {
-                xmldoc.Load(fileName);
-            }
-            catch (Exception)
-            {
-                return;
-            }
-
-            XmlElement root = xmldoc.DocumentElement;
-            XmlNodeList nodes = root.GetElementsByTagName("item");
-
-            foreach (XmlNode node in nodes)
-            {
-                XmlElement oneEle = node as XmlElement;
-
-                string OneName = oneEle.GetAttribute("name");
-                string min = oneEle.GetAttribute("min");
-                string max = oneEle.GetAttribute("max");
-                if (OneName.Equals(name))
-                {
-                    oneEle.SetAttribute(item, value);
-                    break;
-                }
-            }
-            xmldoc.Save(fileName);
-        }
-
         public static void InitConfigsFromSystemConfigXml(string fileName)
         {
             XmlDocument xmldoc = new XmlDocument();
-            try
-            {
-                xmldoc.Load(fileName);
 
+            xmldoc.Load(fileName);
+            XmlElement root = xmldoc.DocumentElement;
+            
+            string CarType = GetAttr(root, "NextCar", "type");
+            Config.ProjectType = (ProjectType)Enum.Parse(typeof(ProjectType), CarType);
 
-                XmlElement root = xmldoc.DocumentElement;
+            Config.NeedTest_ID3 = GetBoolAttr(root, "NeedTest", "ID3");
+            Config.NeedTest_ID4X = GetBoolAttr(root, "NeedTest", "ID4X");
+            Config.NeedTest_ID6X = GetBoolAttr(root, "NeedTest", "ID6X");
+            Config.NeedTest_AUDI = GetBoolAttr(root, "NeedTest", "AUDI");
 
-                string CarType = GetAttr(root, "NextCar", "type");
-                if (CarType.Equals("ID3"))
-                {
-                    Config.ProjectType = ProjectType.ID3;
-                }
-                if (CarType.Equals("ID4X"))
-                {
-                    Config.ProjectType = ProjectType.ID4X;
-                }
-                if (CarType.Equals("ID6X"))
-                {
-                    Config.ProjectType = ProjectType.ID6X;
-                }
-                if (CarType.Equals("AUDI"))
-                {
-                    Config.ProjectType = ProjectType.AUDI;
-                }
-
-                Config.NeedTest_ID3 = GetBoolAttr(root, "NeedTest", "ID3");
-                Config.NeedTest_ID4X = GetBoolAttr(root, "NeedTest", "ID4X");
-                Config.NeedTest_ID6X = GetBoolAttr(root, "NeedTest", "ID6X");
-                Config.NeedTest_AUDI = GetBoolAttr(root, "NeedTest", "AUDI");
-
-
-            }
-            catch (Exception)
-            {
-                return;
-            }
+            Config.NeedTest_ID3N = GetBoolAttr(root, "NeedTest", "ID3N");
+            Config.NeedTest_ID4XN = GetBoolAttr(root, "NeedTest", "ID4XN");
+            Config.NeedTest_ID6XN = GetBoolAttr(root, "NeedTest", "ID6XN");
+            Config.NeedTest_AUDIN = GetBoolAttr(root, "NeedTest", "AUDIN");
         }
 
 
         public static string GetAttr(XmlElement root, string elementName, string attrName)
         {
-            XmlNodeList nodes = root.GetElementsByTagName(elementName);
-            foreach (XmlNode node in nodes)
-            {
-                XmlElement oneEle = node as XmlElement;
-
-                string attr = oneEle.GetAttribute(attrName);
-                return attr;
-            }
-
-            return "";
+            XmlElement? element = root.GetElementsByTagName(elementName).OfType<XmlElement>().FirstOrDefault();
+            return element?.GetAttribute(attrName) ?? string.Empty;
         }
 
-        private static double GetDoubleValue(XmlElement oneEle, string name)
-        {
-            string str = oneEle.GetAttribute(name);
-            double rlt = 0;
-            double.TryParse(str, out rlt);
-            return rlt;
-        }
-
-        private static int GetIntValue(XmlElement oneEle, string name)
-        {
-            string str = oneEle.GetAttribute(name);
-            int rlt = 0;
-            int.TryParse(str, out rlt);
-            return rlt;
-        }
 
         public static bool GetBoolAttr(XmlElement root, string elementName, string attrName)
         {

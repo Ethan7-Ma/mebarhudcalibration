@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <config>
-  <Directory path="D:\Log_ID3" />
+  <Directory path="D:\Log_ID3N" />
   <PixelToMM ratio="0.52" />
   <Distance length="13000" />
   <Threshold value="150" />

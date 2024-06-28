@@ -7,11 +7,15 @@ namespace MEB_ARHUD_Calibration.Common
 {
     enum ProjectType
     {
-        Unknown = 0,
-        ID3 = 1,
-        ID4X = 2,
-        ID6X = 3,
-        AUDI = 4,
+        Unknown,
+        ID3,
+        ID4X,
+        ID6X,
+        AUDI,
+        ID3N,
+        ID4XN,
+        ID6XN,
+        AUDIN
     }
 
     enum TestResultType
@@ -52,20 +56,25 @@ namespace MEB_ARHUD_Calibration.Common
         public static bool NeedTest_ID6X = true;
         public static bool NeedTest_AUDI = true;
 
+        public static bool NeedTest_ID3N = true;
+        public static bool NeedTest_ID4XN = true;
+        public static bool NeedTest_ID6XN = true;
+        public static bool NeedTest_AUDIN = true;
+
         public static double Rotation_ID3 = 2.0; // 2024-4-11 晴 今天心情大好作此修改。 由2.005 改到2
         public static double Rotation_ID4X = 1.505;
         public static double Rotation_ID6X = 1.505;
         public static double Rotation_AUDI = 1.505;
 
+        public static double Rotation_ID3N = 2.0; // 2024-4-11 晴 今天心情大好作此修改。 由2.005 改到2
+        public static double Rotation_ID4XN = 1.505;
+        public static double Rotation_ID6XN = 1.505;
+        public static double Rotation_AUDIN = 1.505;
+
         public static int MaxMoveAngle = 3000; //2024-4-11 晴 今天心情大好作此修改。 由2160 改到3000
 
-        public static int CameraPixels = 9;
+        public static int CenterMovedLimit = 9;
 
 
-
-
-
-        public static string Version = "1.00";
-        public static string UpdateTime = "2021.09.01";
     }
 }

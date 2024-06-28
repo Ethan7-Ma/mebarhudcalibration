@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <config>
-  <Directory path="D:\Log_ID3" />
+  <Directory path="D:\Log_ID3N" />
   <PixelToMM ratio="0.52" />
   <Distance length="13000" />
   <Threshold value="150" />
-  <Center CC_X="-78" CC_Y="-74" />
-  <Offset X="0" Y="0" />
+  <Center CC_X="32" CC_Y="70" />
+  <Offset X="-140" Y="-20" />
 </config>

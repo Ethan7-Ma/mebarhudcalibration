@@ -1,7 +1,7 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <config>
-  <Directory path="D:\Log_ID3" />
-  <PixelToMM ratio="0.92" />
+  <Directory path="D:\Log_ID6XN" />
+  <PixelToMM ratio="0.52" />
   <Distance length="13000" />
   <Threshold value="150" />
   <Center CC_X="65" CC_Y="2" />

@@ -298,7 +298,7 @@ namespace MEB_ARHUD_Calibration.Logic
                         mL.ShowLog("L: " + Angle_L + " R: " + Angle_R, LogType.ImageAnalyse);
                         AnalyseImageCenterTestFinished?.Invoke();
 
-                        if (centerMoved.X <= Config.CameraPixels && centerMoved.X >= -Config.CameraPixels && centerMoved.Y <= Config.CameraPixels && centerMoved.Y >= -Config.CameraPixels)
+                        if (centerMoved.X <= Config.CenterMovedLimit && centerMoved.X >= -Config.CenterMovedLimit && centerMoved.Y <= Config.CenterMovedLimit && centerMoved.Y >= -Config.CenterMovedLimit)
                         {
 
                             bool RotationOK = CheckRotationOK(iaL.RotationResult);
